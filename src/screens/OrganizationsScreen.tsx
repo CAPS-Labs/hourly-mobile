@@ -17,6 +17,7 @@ export default function OrganizationsScreen() {
 
 
     return (
+        
         <View>
 
             <Text>{organization.name}</Text>
