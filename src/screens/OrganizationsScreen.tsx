@@ -1,42 +1,62 @@
-import { View, Text } from "react-native";
+import React, { useState } from "react";
+import { View, Text, Button, TextInput, ScrollView } from "react-native";
 
 export default function OrganizationsScreen() {
+  // STATE (top of component)
+  const [mode, setMode] = useState("list");
 
-    // The following const are temps for testing functionality
-
-    const userRole = "admin"; // or "member"
-
-    const organization = {
-        name: "Helping Hands",
-        slogan: "Serving the community together",
-        totalHours: 1240,
-        memberCount: 32,
-    };
-
-    const myHours = 42;
-
+  // MOCK DATA
+  const organizations = [
+    { id: 1, name: "Helping Hands" },
+    { id: 2, name: "Food Bank" },
+  ];
 
     return (
         
-        <View>
+        <View style={{ flex: 1, padding: 16 }}>
 
-            <Text>{organization.name}</Text>
-            <Text>{organization.slogan}</Text>
-            <Text>Total Hours: {organization.totalHours}</Text>
-            <Text>Members: {organization.memberCount}</Text>
+            {/* TOP BUTTONS */}
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                <Button title="Create" onPress={() => setMode("create")} />
+                <Button title="Join" onPress={() => setMode("join")} />
+            </View>
 
-            <Text>My Hours: {myHours}</Text>
+            // CONDITIONAL RENDERING
 
-            {userRole === "admin" && (
+            {mode === "list" && (
+                <ScrollView>
+                {organizations.map((org) => (
+                    <View key={org.id} style={{ padding: 12, marginVertical: 8, backgroundColor: "#eee" }}>
+                        <Text>{org.name}</Text>
+                    </View>
+                ))}
+                </ScrollView>
+            )}
+
+            {mode === "create" && (
                 <View>
-                    <Text>ADMIN PANEL</Text>
-                    <Text>Edit Organization</Text>
-                    <Text>Manage Members</Text>
-                    <Text>Set Quota</Text>
+                <Text>Create Organization</Text>
+                <TextInput placeholder="Name" />
+                <TextInput placeholder="Slogan" />
+                <Button title="Submit" onPress={() => setMode("list")} />
+                </View>
+            )}
+
+            {mode === "join" && (
+                <View>
+                <Text>Join Organization</Text>
+                <TextInput placeholder="Enter code" />
+                <Button title="Join" onPress={() => setMode("list")} />
+                </View>
+            )}
+
+            {mode === "detail" && (
+                <View>
+                <Text>Organization Detail View</Text>
                 </View>
             )}
 
         </View>
-        
+
     );
 }
