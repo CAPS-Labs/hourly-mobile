@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, Button, TextInput, ScrollView } from "react-native";
+import { View, Text, Button, TextInput, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import Card from "../components/Card"
+import { COLORS } from "../constants/colors";
 
 export default function OrganizationsScreen() {
   // STATE (top of component)
@@ -13,10 +15,10 @@ export default function OrganizationsScreen() {
 
     return (
         
-        <View style={{ flex: 1, padding: 16 }}>
+        <View style={styles.Screen}>
 
             {/* TOP BUTTONS */}
-            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between"}}>
                 <Button title="Create" onPress={() => setMode("create")} />
                 <Button title="Join" onPress={() => setMode("join")} />
             </View>
@@ -25,11 +27,19 @@ export default function OrganizationsScreen() {
 
             {mode === "list" && (
                 <ScrollView>
-                {organizations.map((org) => (
-                    <View key={org.id} style={{ padding: 12, marginVertical: 8, backgroundColor: "#eee" }}>
-                        <Text>{org.name}</Text>
-                    </View>
-                ))}
+                    {organizations.map((org) => (
+                        <TouchableOpacity
+                            key={org.id}
+                            activeOpacity={0.8}
+                            onPress={() => {
+                            console.log("Clicked:", org.name);
+                            }}
+                            >
+                            <Card>
+                            <Text>{org.name}</Text>
+                            </Card>
+                        </TouchableOpacity>
+                    ))}
                 </ScrollView>
             )}
 
@@ -60,3 +70,15 @@ export default function OrganizationsScreen() {
 
     );
 }
+
+const styles = StyleSheet.create({
+    OrganizationName: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        fontSize: 24,
+    },
+    Screen: {
+        backgroundColor: "rgb(22, 22, 22)",
+    } 
+});
