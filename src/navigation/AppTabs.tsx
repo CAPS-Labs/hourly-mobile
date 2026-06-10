@@ -14,13 +14,13 @@ export default function AppTabs() {
       <Tab.Navigator>
 
         <Tab.Screen
-          name="Home"
-          component={HomeScreen}
+          name="Organizations"
+          component={OrganizationsScreen}
         />
 
         <Tab.Screen
-          name="Organizations"
-          component={OrganizationsScreen}
+          name="Home"
+          component={HomeScreen}
         />
 
         <Tab.Screen
