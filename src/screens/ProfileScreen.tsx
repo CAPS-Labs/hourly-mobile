@@ -6,13 +6,13 @@ export default function ProfileScreen() {
 
     return(
 
-        <view>
+        <View>
 
-            <text>Name</text>
-            <text>Organizaion</text>
-            <text>All time hours</text>
+            <Text>Name</Text>
+            <Text>Organizaion</Text>
+            <Text>All time hours</Text>
 
-        </view>
+        </View>
 
     );
 }
