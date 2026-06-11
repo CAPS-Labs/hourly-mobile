@@ -8,11 +8,7 @@ export type OrganizationMembership = {
 };
 
 export type Organization = {
-  id: string;
+  id: number;
   name: string;
-  slogan?: string;
-  logoUrl?: string;
-  totalHours: number;
-  memberCount: number;
-  yearlyQuota?: number;
+  slogan: string;
 };

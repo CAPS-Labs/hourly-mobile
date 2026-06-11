@@ -1,34 +1,53 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { View } from "react-native";
 
 import HomeScreen from "../screens/HomeScreen";
 import OrganizationsScreen from "../screens/OrganizationsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import { Colors } from "../constants/colors";
 
 const Tab = createBottomTabNavigator();
 
 export default function AppTabs() {
   return (
     <NavigationContainer>
-      <Tab.Navigator>
+      <View style={{ flex: 1, backgroundColor: Colors.background }}>
+        <Tab.Navigator
+          screenOptions={{
 
-        <Tab.Screen
-          name="Organizations"
-          component={OrganizationsScreen}
-        />
+            // Bottom Tab Bar
+            tabBarStyle: {
+              backgroundColor: Colors.background,
+              borderTopWidth: 0,
+            },
+            tabBarActiveTintColor: "#ffffff",
+            tabBarInactiveTintColor: "#686868",
 
-        <Tab.Screen
-          name="Home"
-          component={HomeScreen}
-        />
+            // Header
+            headerShown: false
+            
+          }}
+        >
 
-        <Tab.Screen
-          name="Profile"
-          component={ProfileScreen}
-        />
+          <Tab.Screen
+            name="Organizations"
+            component={OrganizationsScreen}
+          />
 
-      </Tab.Navigator>
+          <Tab.Screen
+            name="Home"
+            component={HomeScreen}
+          />
+
+          <Tab.Screen
+            name="Profile"
+            component={ProfileScreen}
+          />
+
+        </Tab.Navigator>
+      </View>
     </NavigationContainer>
   );
 }
