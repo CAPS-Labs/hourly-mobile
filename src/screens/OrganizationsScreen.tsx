@@ -18,6 +18,7 @@ export default function OrganizationsScreen() {
   const [selectedField, setSelectedField] = useState("");
 
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
+  const [signedUpProjects, setSignedUpProjects] = useState<number[]>([]);
 
   // MOCK DATA
   const organizations = [
@@ -33,6 +34,49 @@ export default function OrganizationsScreen() {
     "Event Services",
     "Hourly Development",
     ];
+
+  const organizationStats = [
+    { label: "Your Hours", value: "42" },
+    { label: "Organization Total", value: "1,240" },
+  ];
+
+  const projects = [
+    {
+      id: 1,
+      title: "Concession Stand",
+      when: "Fri, Oct 30 · 5:00 – 9:00 PM",
+      where: "Home Stadium · Concession A",
+      spots: 4,
+    },
+    {
+      id: 2,
+      title: "Coffee Bar",
+      when: "Sat, Oct 31 · 7:00 – 10:00 AM",
+      where: "Community Center Lobby",
+      spots: 2,
+    },
+    {
+      id: 3,
+      title: "Park Cleanup",
+      when: "Sun, Nov 1 · 9:00 AM – 12:00 PM",
+      where: "Riverside Park · North Entrance",
+      spots: 8,
+    },
+    {
+      id: 4,
+      title: "Event Setup & Teardown",
+      when: "Wed, Nov 4 · 3:30 – 7:30 PM",
+      where: "Gymnasium",
+      spots: 3,
+    },
+    {
+      id: 5,
+      title: "Yearbook Photos",
+      when: "Thu, Nov 5 · 4:00 – 6:00 PM",
+      where: "Media Room",
+      spots: 1,
+    },
+  ];
 
     return (
         
@@ -99,74 +143,107 @@ export default function OrganizationsScreen() {
             <Modal
                 visible={modalVisible}
                 animationType="slide"
-                transparent={true}
+                transparent={false}
             >
-                <View
-                    style={{
-                    flex: 1,
-                    backgroundColor: "rgba(0,0,0,0.6)",
-                    justifyContent: "flex-end",
-                    }}
-                >
-                    <View
-                    style={{
-                        backgroundColor: "#1F1F1F",
-                        padding: 20,
-                        borderTopLeftRadius: 20,
-                        borderTopRightRadius: 20,
-                        minHeight: "60%",
-                    }}
-                    >
+                <View style={styles.OrgModal}>
                     {/* CLOSE BUTTON */}
-                    <Pressable onPress={() => setModalVisible(false)}>
-                        <Text style={{ color: "#888", marginBottom: 10 }}>Close</Text>
+                    <Pressable
+                        onPress={() => setModalVisible(false)}
+                        style={styles.CloseButton}
+                    >
+                        <Text style={{ color: Colors.secondaryText }}>Close</Text>
                     </Pressable>
 
-                    {/* CONTENT */}
                     {selectedOrg && (
                         <>
-                        <Text style={{ color: "white", fontSize: 22, fontWeight: "600" }}>
-                            {selectedOrg.name}
-                        </Text>
+                        {/* HEADER */}
+                        <View style={styles.OrgHeader}>
+                            <Text style={styles.OrgName}>{selectedOrg.name}</Text>
 
-                        <Text style={{ color: "#aaa", marginTop: 6 }}>
-                            {selectedOrg.slogan}
-                        </Text>
-
-                        <View style={{ marginTop: 20 }}>
-                            <Text style={{ color: "white" }}>Your Hours: 42</Text>
-                            <Text style={{ color: "white", marginTop: 8 }}>Organization Total: 1240</Text>
+                            {!!selectedOrg.slogan && (
+                                <Text style={styles.OrgSlogan}>{selectedOrg.slogan}</Text>
+                            )}
                         </View>
 
-                        <View style={{ marginTop: 30 }}>
+                        <ScrollView
+                            style={{ flex: 1 }}
+                            contentContainerStyle={styles.OrgModalContent}
+                            showsVerticalScrollIndicator={false}
+                        >
+                            {/* STATS */}
+                            <View style={styles.StatsRow}>
+                                {organizationStats.map((stat) => (
+                                    <View key={stat.label} style={styles.StatTile}>
+                                        <Text style={styles.StatValue}>{stat.value}</Text>
+                                        <Text style={styles.StatLabel}>{stat.label}</Text>
+                                    </View>
+                                ))}
+                            </View>
+
+                            {/* SUBMIT HOURS */}
                             <Pressable
-                                style={{
-                                    backgroundColor: "#4A90E2",
-                                    padding: 12,
-                                    borderRadius: 10,
-                                    marginBottom: 10,
-                                }}
                                 onPress={() => {
-                                     setModalVisible(false);
+                                    setModalVisible(false);
                                     setModalHours(true);
                                 }}
+                                style={({ pressed }) => [
+                                    styles.SubmitHoursButton,
+                                    pressed && { opacity: 0.85 },
+                                ]}
                             >
-                                <Text style={{ color: "white", textAlign: "center" }}>Submit Hours</Text>
+                                <Text style={styles.SubmitHoursText}>Submit Hours</Text>
                             </Pressable>
 
-                            <Pressable
-                                style={{
-                                    backgroundColor: "#333",
-                                    padding: 12,
-                                    borderRadius: 10,
-                                }}
-                            >
-                                <Text style={{ color: "white", textAlign: "center" }}>View Projects</Text>
-                            </Pressable>
-                        </View>
+                            {/* UPCOMING PROJECTS */}
+                            <Text style={styles.SectionTitle}>Upcoming Projects</Text>
+                            <Text style={styles.SectionSubtitle}>
+                                Sign up for a shift and it will count toward your hours.
+                            </Text>
+
+                            {projects.map((project) => {
+                                const signedUp = signedUpProjects.includes(project.id);
+                                const spotsLeft = project.spots - (signedUp ? 1 : 0);
+
+                                return (
+                                    <View key={project.id} style={styles.ProjectCard}>
+                                        <View style={{ flex: 1, paddingRight: 12 }}>
+                                            <Text style={styles.ProjectTitle}>{project.title}</Text>
+                                            <Text style={styles.ProjectMeta}>{project.when}</Text>
+                                            <Text style={styles.ProjectMeta}>{project.where}</Text>
+                                            <Text style={styles.ProjectSpots}>
+                                                {spotsLeft} {spotsLeft === 1 ? "spot" : "spots"} left
+                                            </Text>
+                                        </View>
+
+                                        <Pressable
+                                            onPress={() =>
+                                                setSignedUpProjects((current) =>
+                                                    current.includes(project.id)
+                                                        ? current.filter((id) => id !== project.id)
+                                                        : [...current, project.id]
+                                                )
+                                            }
+                                            style={({ pressed }) => [
+                                                styles.SignUpButton,
+                                                signedUp && styles.SignUpButtonActive,
+                                                pressed && { opacity: 0.8 },
+                                            ]}
+                                        >
+                                            <Text
+                                                style={[
+                                                    styles.SignUpText,
+                                                    signedUp && styles.SignUpTextActive,
+                                                ]}
+                                            >
+                                                {signedUp ? "Signed Up ✓" : "Sign Up"}
+                                            </Text>
+                                        </Pressable>
+                                    </View>
+                                );
+                            })}
+                        </ScrollView>
                         </>
                     )}
-                    </View>
                 </View>
             </Modal>
             <Modal
@@ -426,5 +503,125 @@ const styles = StyleSheet.create({
     Screen: {
         backgroundColor: Colors.background,
         flex: 1,
-    } 
+    },
+    OrgModal: {
+        flex: 1,
+        backgroundColor: Colors.background,
+        paddingTop: 60,
+    },
+    CloseButton: {
+        alignSelf: "flex-end",
+        paddingHorizontal: 20,
+        paddingVertical: 8,
+    },
+    OrgHeader: {
+        alignItems: "center",
+        paddingHorizontal: 24,
+        marginTop: 4,
+    },
+    OrgName: {
+        color: Colors.text,
+        fontSize: 28,
+        fontWeight: "700",
+        textAlign: "center",
+    },
+    OrgSlogan: {
+        color: Colors.secondaryText,
+        fontSize: 15,
+        lineHeight: 21,
+        textAlign: "center",
+        marginTop: 8,
+    },
+    OrgModalContent: {
+        padding: 20,
+        paddingBottom: 48,
+    },
+    StatsRow: {
+        flexDirection: "row",
+        gap: 12,
+    },
+    StatTile: {
+        flex: 1,
+        backgroundColor: Colors.card,
+        borderRadius: 16,
+        paddingVertical: 18,
+        paddingHorizontal: 14,
+        alignItems: "center",
+    },
+    StatValue: {
+        color: Colors.text,
+        fontSize: 26,
+        fontWeight: "700",
+    },
+    StatLabel: {
+        color: Colors.secondaryText,
+        fontSize: 12,
+        marginTop: 6,
+        textAlign: "center",
+    },
+    SubmitHoursButton: {
+        backgroundColor: "#4A90E2",
+        padding: 14,
+        borderRadius: 10,
+        marginTop: 16,
+    },
+    SubmitHoursText: {
+        color: "white",
+        textAlign: "center",
+        fontWeight: "600",
+    },
+    SectionTitle: {
+        color: Colors.text,
+        fontSize: 18,
+        fontWeight: "600",
+        marginTop: 30,
+    },
+    SectionSubtitle: {
+        color: Colors.secondaryText,
+        fontSize: 13,
+        marginTop: 4,
+        marginBottom: 14,
+    },
+    ProjectCard: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: Colors.card,
+        borderRadius: 14,
+        padding: 16,
+        marginBottom: 12,
+    },
+    ProjectTitle: {
+        color: Colors.text,
+        fontSize: 16,
+        fontWeight: "600",
+    },
+    ProjectMeta: {
+        color: Colors.secondaryText,
+        fontSize: 13,
+        marginTop: 4,
+    },
+    ProjectSpots: {
+        color: "#4A90E2",
+        fontSize: 12,
+        marginTop: 6,
+    },
+    SignUpButton: {
+        backgroundColor: Colors.primary,
+        paddingVertical: 10,
+        paddingHorizontal: 14,
+        borderRadius: 999,
+    },
+    SignUpButtonActive: {
+        backgroundColor: "transparent",
+        borderWidth: 1,
+        borderColor: Colors.primary,
+    },
+    SignUpText: {
+        color: "white",
+        fontSize: 13,
+        fontWeight: "600",
+    },
+    SignUpTextActive: {
+        color: Colors.secondaryText,
+    },
 });
