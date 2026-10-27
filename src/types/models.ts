@@ -12,3 +12,18 @@ export type Organization = {
   name: string;
   slogan: string;
 };
+
+export type Project = {
+  id: number;
+  title: string;
+  when: string;
+  where: string;
+  spots: number;
+};
+
+export type HourEntry = {
+  id: number;
+  hours: number;
+  field: string;
+  notes: string;
+};

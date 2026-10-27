@@ -4,8 +4,8 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { View } from "react-native";
 
 import HomeScreen from "../screens/HomeScreen";
-import OrganizationsScreen from "../screens/OrganizationsScreen";
-import ProfileScreen from "../screens/ProfileScreen";
+import MyServiceScreen from "../screens/MyServiceScreen";
+import ProjectsScreen from "../screens/ProjectsScreen";
 import { Colors } from "../constants/colors";
 
 const Tab = createBottomTabNavigator();
@@ -32,8 +32,9 @@ export default function AppTabs() {
         >
 
           <Tab.Screen
-            name="Organizations"
-            component={OrganizationsScreen}
+            name="MyService"
+            component={MyServiceScreen}
+            options={{ tabBarLabel: "My Service" }}
           />
 
           <Tab.Screen
@@ -42,8 +43,8 @@ export default function AppTabs() {
           />
 
           <Tab.Screen
-            name="Profile"
-            component={ProfileScreen}
+            name="Projects"
+            component={ProjectsScreen}
           />
 
         </Tab.Navigator>
