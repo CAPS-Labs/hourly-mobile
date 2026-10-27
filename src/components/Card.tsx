@@ -1,6 +1,7 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { Colors } from "../constants/colors";
 
 type CardProps = {
   children: React.ReactNode;
@@ -10,7 +11,7 @@ export default function Card({ children }: CardProps) {
   return (
 
     <LinearGradient
-      colors={["#a6d4e9", "#cdf0c3"]}
+      colors={[Colors.primary, "#292b30e8"]}
       start={{ x: 0, y: 0 }}
       end={{ x: 0, y: 1 }}
       style={styles.card}

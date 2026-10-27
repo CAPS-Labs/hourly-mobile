@@ -132,9 +132,28 @@ export default function OrganizationsScreen() {
                     ))}
 
                     {/* BUTTONS */}
-                    <View style={{ flexDirection: "row", justifyContent: "space-between"}}>
-                        <Button title="Create" onPress={() => setMode("create")} />
-                        <Button title="Join" onPress={() => setMode("join")} />
+                    <View style={styles.OrgActions}>
+                        <Pressable
+                            onPress={() => setMode("create")}
+                            style={({ pressed }) => [
+                                styles.OrgActionButton,
+                                styles.OrgActionButtonPrimary,
+                                pressed && styles.OrgActionButtonPressed,
+                            ]}
+                        >
+                            <Text style={styles.OrgActionTextPrimary}>Create</Text>
+                        </Pressable>
+
+                        <Pressable
+                            onPress={() => setMode("join")}
+                            style={({ pressed }) => [
+                                styles.OrgActionButton,
+                                styles.OrgActionButtonSecondary,
+                                pressed && styles.OrgActionButtonPressed,
+                            ]}
+                        >
+                            <Text style={styles.OrgActionTextSecondary}>Join</Text>
+                        </Pressable>
                     </View>
                 </ScrollView>
             )}
@@ -623,5 +642,47 @@ const styles = StyleSheet.create({
     },
     SignUpTextActive: {
         color: Colors.secondaryText,
+    },
+    OrgActions: {
+        flexDirection: "row",
+        gap: 12,
+        paddingHorizontal: 12,
+        marginTop: 8,
+    },
+    OrgActionButton: {
+        flex: 1,
+        paddingVertical: 16,
+        borderRadius: 999,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    OrgActionButtonPrimary: {
+        backgroundColor: Colors.primary,
+        shadowColor: "#000",
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 4 },
+        elevation: 3,
+    },
+    OrgActionButtonSecondary: {
+        backgroundColor: Colors.card,
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.14)",
+    },
+    OrgActionButtonPressed: {
+        opacity: 0.8,
+        transform: [{ scale: 0.97 }],
+    },
+    OrgActionTextPrimary: {
+        color: Colors.text,
+        fontSize: 16,
+        fontWeight: "600",
+        letterSpacing: 0.3,
+    },
+    OrgActionTextSecondary: {
+        color: Colors.text,
+        fontSize: 16,
+        fontWeight: "600",
+        letterSpacing: 0.3,
     },
 });
