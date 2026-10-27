@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Button, TextInput, ScrollView, TouchableOpacity, StyleSheet, Modal, Pressable } from "react-native";
+import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Modal, Pressable } from "react-native";
 
 import Card from "../components/Card"
 import { Colors } from "../constants/colors";
@@ -19,6 +19,10 @@ export default function OrganizationsScreen() {
 
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [signedUpProjects, setSignedUpProjects] = useState<number[]>([]);
+
+  const [createName, setCreateName] = useState("");
+  const [createSlogan, setCreateSlogan] = useState("");
+  const [joinCode, setJoinCode] = useState("");
 
   // MOCK DATA
   const organizations = [
@@ -491,20 +495,125 @@ export default function OrganizationsScreen() {
                 </View>
             </Modal>
             {mode === "create" && (
-                <View>
-                <Text>Create Organization</Text>
-                <TextInput placeholder="Name" />
-                <TextInput placeholder="Slogan" />
-                <Button title="Submit" onPress={() => setMode("list")} />
-                </View>
+                <ScrollView
+                    style={{ flex: 1 }}
+                    contentContainerStyle={styles.FormContent}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
+                    <Text style={styles.FormTitle}>Create Organization</Text>
+                    <Text style={styles.FormSubtitle}>
+                        Start an organization, then invite members to join.
+                    </Text>
+
+                    <Text style={styles.FieldLabel}>Name</Text>
+                    <TextInput
+                        value={createName}
+                        onChangeText={setCreateName}
+                        placeholder="e.g. Servants of Spokane"
+                        placeholderTextColor="#777"
+                        autoCapitalize="words"
+                        style={styles.FieldInput}
+                    />
+
+                    <Text style={styles.FieldLabel}>Slogan</Text>
+                    <TextInput
+                        value={createSlogan}
+                        onChangeText={setCreateSlogan}
+                        placeholder="A short line about your organization"
+                        placeholderTextColor="#777"
+                        style={styles.FieldInput}
+                    />
+
+                    <Pressable
+                        disabled={!createName.trim()}
+                        onPress={() => {
+                            console.log("Created organization:", createName, createSlogan);
+                            setCreateName("");
+                            setCreateSlogan("");
+                            setMode("list");
+                        }}
+                        style={({ pressed }) => [
+                            styles.FormButton,
+                            styles.FormButtonPrimary,
+                            !createName.trim() && styles.FormButtonDisabled,
+                            pressed && { opacity: 0.8 },
+                        ]}
+                    >
+                        <Text style={styles.FormButtonText}>Create Organization</Text>
+                    </Pressable>
+
+                    <Pressable
+                        onPress={() => {
+                            setCreateName("");
+                            setCreateSlogan("");
+                            setMode("list");
+                        }}
+                        style={({ pressed }) => [
+                            styles.FormButton,
+                            styles.FormButtonGhost,
+                            pressed && { opacity: 0.8 },
+                        ]}
+                    >
+                        <Text style={styles.FormButtonGhostText}>Cancel</Text>
+                    </Pressable>
+                </ScrollView>
             )}
 
             {mode === "join" && (
-                <View>
-                <Text>Join Organization</Text>
-                <TextInput placeholder="Enter code" />
-                <Button title="Join" onPress={() => setMode("list")} />
-                </View>
+                <ScrollView
+                    style={{ flex: 1 }}
+                    contentContainerStyle={styles.FormContent}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
+                    <Text style={styles.FormTitle}>Join Organization</Text>
+                    <Text style={styles.FormSubtitle}>
+                        Enter the join code shared by an organization leader to become a member.
+                    </Text>
+
+                    <Text style={styles.FieldLabel}>Join code</Text>
+                    <TextInput
+                        value={joinCode}
+                        onChangeText={setJoinCode}
+                        placeholder="e.g. OAKS-2026"
+                        placeholderTextColor="#777"
+                        autoCapitalize="characters"
+                        autoCorrect={false}
+                        style={styles.FieldInput}
+                    />
+
+                    <Pressable
+                        disabled={!joinCode.trim()}
+                        onPress={() => {
+                            console.log("Joining organization with code:", joinCode);
+                            setJoinCode("");
+                            setMode("list");
+                        }}
+                        style={({ pressed }) => [
+                            styles.FormButton,
+                            styles.FormButtonPrimary,
+                            !joinCode.trim() && styles.FormButtonDisabled,
+                            pressed && { opacity: 0.8 },
+                        ]}
+                    >
+                        <Text style={styles.FormButtonText}>Join Organization</Text>
+                    </Pressable>
+
+                    <Pressable
+                        onPress={() => {
+                            setJoinCode("");
+                            setMode("list");
+                        }}
+                        style={({ pressed }) => [
+                            styles.FormButton,
+                            styles.FormButtonGhost,
+                            pressed && { opacity: 0.8 },
+                        ]}
+                    >
+                        <Text style={styles.FormButtonGhostText}>Cancel</Text>
+                    </Pressable>
+                </ScrollView>
             )}
 
         </View>
@@ -681,6 +790,79 @@ const styles = StyleSheet.create({
     },
     OrgActionTextSecondary: {
         color: Colors.text,
+        fontSize: 16,
+        fontWeight: "600",
+        letterSpacing: 0.3,
+    },
+    FormContent: {
+        padding: 20,
+        paddingTop: 8,
+        paddingBottom: 48,
+    },
+    FormTitle: {
+        color: Colors.text,
+        fontSize: 28,
+        fontWeight: "700",
+        letterSpacing: -0.5,
+    },
+    FormSubtitle: {
+        color: Colors.secondaryText,
+        fontSize: 14,
+        lineHeight: 20,
+        marginTop: 8,
+        marginBottom: 26,
+    },
+    FieldLabel: {
+        color: Colors.secondaryText,
+        fontSize: 12,
+        fontWeight: "600",
+        letterSpacing: 0.6,
+        textTransform: "uppercase",
+        marginBottom: 8,
+    },
+    FieldInput: {
+        backgroundColor: Colors.card,
+        color: Colors.text,
+        fontSize: 15,
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.06)",
+        marginBottom: 20,
+    },
+    FormButton: {
+        paddingVertical: 16,
+        borderRadius: 999,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    FormButtonPrimary: {
+        backgroundColor: Colors.primary,
+        shadowColor: "#000",
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 4 },
+        elevation: 3,
+    },
+    FormButtonDisabled: {
+        opacity: 0.4,
+        shadowOpacity: 0,
+        elevation: 0,
+    },
+    FormButtonText: {
+        color: Colors.text,
+        fontSize: 16,
+        fontWeight: "600",
+        letterSpacing: 0.3,
+    },
+    FormButtonGhost: {
+        marginTop: 12,
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.14)",
+    },
+    FormButtonGhostText: {
+        color: Colors.secondaryText,
         fontSize: 16,
         fontWeight: "600",
         letterSpacing: 0.3,
