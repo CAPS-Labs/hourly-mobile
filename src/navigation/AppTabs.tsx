@@ -5,7 +5,7 @@ import { View } from "react-native";
 
 import HomeScreen from "../screens/HomeScreen";
 import MyServiceScreen from "../screens/MyServiceScreen";
-import ProjectsScreen from "../screens/ProjectsScreen";
+import ProjectsStack from "./ProjectsStack";
 import { Colors } from "../constants/colors";
 
 const Tab = createBottomTabNavigator();
@@ -44,7 +44,7 @@ export default function AppTabs() {
 
           <Tab.Screen
             name="Projects"
-            component={ProjectsScreen}
+            component={ProjectsStack}
           />
 
         </Tab.Navigator>

@@ -6,8 +6,11 @@ import { Colors } from "../constants/colors";
 import { useAppState } from "../context/AppStateContext";
 
 export default function MyServiceScreen() {
-  const { organization, personalHours, submissions } = useAppState();
+  const { organization, personalHours, submissions, categories, hoursByCategory } = useAppState();
   const [submitVisible, setSubmitVisible] = useState(false);
+
+  const categoryName = (categoryId: number) =>
+    categories.find((category) => category.id === categoryId)?.name ?? "Uncategorized";
 
   return (
     <View style={styles.Screen}>
@@ -34,6 +37,21 @@ export default function MyServiceScreen() {
           <Text style={styles.SubmitButtonText}>Submit Hours</Text>
         </Pressable>
 
+        {hoursByCategory.length > 0 && (
+          <>
+            <Text style={styles.SectionTitle}>By Category</Text>
+
+            <View style={styles.BreakdownCard}>
+              {hoursByCategory.map((row) => (
+                <View key={row.category.id} style={styles.BreakdownRow}>
+                  <Text style={styles.BreakdownName}>{row.category.name}</Text>
+                  <Text style={styles.BreakdownHours}>{row.hours} hrs</Text>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+
         <Text style={styles.SectionTitle}>Your Submissions</Text>
 
         {submissions.length === 0 ? (
@@ -45,7 +63,7 @@ export default function MyServiceScreen() {
             <View key={entry.id} style={styles.SubmissionCard}>
               <View style={styles.SubmissionRow}>
                 <Text style={styles.SubmissionHours}>{entry.hours} hrs</Text>
-                <Text style={styles.SubmissionField}>{entry.field}</Text>
+                <Text style={styles.SubmissionField}>{categoryName(entry.categoryId)}</Text>
               </View>
 
               {!!entry.notes && <Text style={styles.SubmissionNotes}>{entry.notes}</Text>}
@@ -132,6 +150,29 @@ const styles = StyleSheet.create({
     color: Colors.secondaryText,
     fontSize: 14,
     lineHeight: 20,
+  },
+  BreakdownCard: {
+    backgroundColor: Colors.card,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  BreakdownRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+  },
+  BreakdownName: {
+    color: Colors.text,
+    fontSize: 14,
+    flexShrink: 1,
+    paddingRight: 12,
+  },
+  BreakdownHours: {
+    color: Colors.secondaryText,
+    fontSize: 13,
+    fontWeight: "600",
   },
   SubmissionCard: {
     backgroundColor: Colors.card,
