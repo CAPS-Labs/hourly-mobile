@@ -4,6 +4,10 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Colors } from "../constants/colors";
 import { useAppState } from "../context/AppStateContext";
 
+/**
+ * Upcoming opportunities with the organization, each with a sign-up toggle and
+ * the number of spots still open.
+ */
 export default function ProjectsScreen() {
   const { organization, projects, isSignedUp, toggleProjectSignUp } = useAppState();
 

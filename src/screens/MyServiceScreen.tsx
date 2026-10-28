@@ -5,6 +5,10 @@ import SubmitHoursModal from "../components/SubmitHoursModal";
 import { Colors } from "../constants/colors";
 import { useAppState } from "../context/AppStateContext";
 
+/**
+ * The viewer's own service record: total hours, the submit-hours entry point,
+ * and the list of hours they have logged this session.
+ */
 export default function MyServiceScreen() {
   const { organization, personalHours, submissions } = useAppState();
   const [submitVisible, setSubmitVisible] = useState(false);
