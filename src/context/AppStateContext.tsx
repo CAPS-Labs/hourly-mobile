@@ -98,6 +98,8 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [opportunities, setOpportunities] = useState<Opportunity[]>(OPPORTUNITIES);
   const [signedUpOpportunityIds, setSignedUpOpportunityIds] = useState<number[]>([]);
   const [submissions, setSubmissions] = useState<HourEntry[]>([]);
+  const [allProjectMemberships, setAllProjectMemberships] =
+    useState<ProjectMembership[]>(PROJECT_MEMBERSHIPS);
   // Submission ids double as list keys, so they must never repeat. Date.now()
   // collides when two submissions land in the same millisecond; a counter does not.
   const nextSubmissionId = useRef(1);
@@ -112,7 +114,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   const submitHours = useCallback(({ hours, projectId, notes }: SubmitHoursInput) => {
     setSubmissions((current) => [
-      { id: nextSubmissionId.current++, hours, field, notes },
+      { id: nextSubmissionId.current++, hours, projectId, notes },
       ...current,
     ]);
   }, []);
