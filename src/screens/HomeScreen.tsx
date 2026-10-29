@@ -5,6 +5,10 @@ import SubmitHoursModal from "../components/SubmitHoursModal";
 import { Colors } from "../constants/colors";
 import { useAppState } from "../context/AppStateContext";
 
+/**
+ * Landing tab: organization identity, the hours totals, and a shortcut to log
+ * new hours.
+ */
 export default function HomeScreen() {
   const { organization, organizationTotalHours, personalHours } = useAppState();
   const [submitVisible, setSubmitVisible] = useState(false);

@@ -7,6 +7,9 @@ type CardProps = {
   children: React.ReactNode;
 };
 
+/**
+ * Rounded gradient panel used to group content, e.g. one tile per organization.
+ */
 export default function Card({ children }: CardProps) {
   return (
 

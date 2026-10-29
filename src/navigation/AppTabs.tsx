@@ -10,6 +10,9 @@ import { Colors } from "../constants/colors";
 
 const Tab = createBottomTabNavigator();
 
+/**
+ * Bottom-tab shell of the signed-in app: My Service, Home, and Projects.
+ */
 export default function AppTabs() {
   return (
     <NavigationContainer>

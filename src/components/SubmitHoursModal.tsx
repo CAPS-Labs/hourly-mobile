@@ -10,6 +10,10 @@ type SubmitHoursModalProps = {
   onClose: () => void;
 };
 
+/**
+ * Full-screen form for logging hours against a service field. Resets its own
+ * inputs on every dismissal so reopening always starts blank.
+ */
 export default function SubmitHoursModal({ visible, onClose }: SubmitHoursModalProps) {
   const { organization, projects, projectMemberships, submitHours } = useAppState();
 
@@ -24,7 +28,7 @@ export default function SubmitHoursModal({ visible, onClose }: SubmitHoursModalP
   const selectedProject = options.find((project) => project.id === selectedProjectId) ?? null;
 
   const hours = Number(hoursInput);
-  const canSubmit = hours > 0 && selectedProject !== null;
+  const canSubmit = Number.isFinite(hours) && hours > 0 && !!selectedField;
 
   const reset = () => {
     setHoursInput("");
@@ -48,7 +52,12 @@ export default function SubmitHoursModal({ visible, onClose }: SubmitHoursModalP
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={false}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent={false}
+      onRequestClose={close}
+    >
       <View style={styles.Screen}>
         <Text style={styles.Title}>Submit Hours</Text>
         <Text style={styles.Subtitle}>

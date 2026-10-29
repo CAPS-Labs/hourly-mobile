@@ -1,4 +1,11 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   PROJECTS,
@@ -82,13 +89,18 @@ type AppState = {
 
 const AppStateContext = createContext<AppState | null>(null);
 
+/**
+ * Holds the in-memory app state (projects, sign-ups, submitted hours) and hands
+ * it to the screens. Everything here is session-local mock data for now.
+ */
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [projects, setProjects] = useState<Project[]>(PROJECTS);
   const [opportunities, setOpportunities] = useState<Opportunity[]>(OPPORTUNITIES);
   const [signedUpOpportunityIds, setSignedUpOpportunityIds] = useState<number[]>([]);
   const [submissions, setSubmissions] = useState<HourEntry[]>([]);
-  const [allProjectMemberships, setAllProjectMemberships] =
-    useState<ProjectMembership[]>(PROJECT_MEMBERSHIPS);
+  // Submission ids double as list keys, so they must never repeat. Date.now()
+  // collides when two submissions land in the same millisecond; a counter does not.
+  const nextSubmissionId = useRef(1);
 
   const toggleOpportunitySignUp = useCallback((opportunityId: number) => {
     setSignedUpOpportunityIds((current) =>
@@ -100,7 +112,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   const submitHours = useCallback(({ hours, projectId, notes }: SubmitHoursInput) => {
     setSubmissions((current) => [
-      { id: Date.now(), hours, projectId, notes },
+      { id: nextSubmissionId.current++, hours, field, notes },
       ...current,
     ]);
   }, []);
@@ -271,6 +283,11 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
 }
 
+/**
+ * Reads the app state from context. Throws when rendered outside
+ * `AppStateProvider` so a missing provider fails loudly instead of silently
+ * rendering empty screens.
+ */
 export function useAppState() {
   const state = useContext(AppStateContext);
 
