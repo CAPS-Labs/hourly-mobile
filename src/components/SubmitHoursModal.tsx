@@ -22,8 +22,6 @@ export default function SubmitHoursModal({ visible, onClose }: SubmitHoursModalP
   const [fieldPickerVisible, setFieldPickerVisible] = useState(false);
 
   const hours = Number(hoursInput);
-  // Number() turns pasted values like "1e309" into Infinity, so require a finite
-  // number: a non-finite entry would otherwise poison the personal-hours total.
   const canSubmit = Number.isFinite(hours) && hours > 0 && !!selectedField;
 
   const reset = () => {
