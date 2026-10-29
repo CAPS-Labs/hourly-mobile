@@ -6,11 +6,11 @@ import { Colors } from "../constants/colors";
 import { useAppState } from "../context/AppStateContext";
 
 export default function MyServiceScreen() {
-  const { organization, personalHours, submissions, categories, hoursByCategory } = useAppState();
+  const { organization, personalHours, submissions, projects, hoursByProject } = useAppState();
   const [submitVisible, setSubmitVisible] = useState(false);
 
-  const categoryName = (categoryId: number) =>
-    categories.find((category) => category.id === categoryId)?.name ?? "Uncategorized";
+  const projectName = (projectId: number) =>
+    projects.find((project) => project.id === projectId)?.name ?? "No project";
 
   return (
     <View style={styles.Screen}>
@@ -37,14 +37,14 @@ export default function MyServiceScreen() {
           <Text style={styles.SubmitButtonText}>Submit Hours</Text>
         </Pressable>
 
-        {hoursByCategory.length > 0 && (
+        {hoursByProject.length > 0 && (
           <>
-            <Text style={styles.SectionTitle}>By Category</Text>
+            <Text style={styles.SectionTitle}>By Project</Text>
 
             <View style={styles.BreakdownCard}>
-              {hoursByCategory.map((row) => (
-                <View key={row.category.id} style={styles.BreakdownRow}>
-                  <Text style={styles.BreakdownName}>{row.category.name}</Text>
+              {hoursByProject.map((row) => (
+                <View key={row.project.id} style={styles.BreakdownRow}>
+                  <Text style={styles.BreakdownName}>{row.project.name}</Text>
                   <Text style={styles.BreakdownHours}>{row.hours} hrs</Text>
                 </View>
               ))}
@@ -63,7 +63,7 @@ export default function MyServiceScreen() {
             <View key={entry.id} style={styles.SubmissionCard}>
               <View style={styles.SubmissionRow}>
                 <Text style={styles.SubmissionHours}>{entry.hours} hrs</Text>
-                <Text style={styles.SubmissionField}>{categoryName(entry.categoryId)}</Text>
+                <Text style={styles.SubmissionField}>{projectName(entry.projectId)}</Text>
               </View>
 
               {!!entry.notes && <Text style={styles.SubmissionNotes}>{entry.notes}</Text>}

@@ -10,11 +10,11 @@ import type { ProjectsStackParamList } from "../navigation/ProjectsStack";
 type Props = NativeStackScreenProps<ProjectsStackParamList, "Requests">;
 
 /**
- * Every pending category request in one place. Approving is a queue job that
- * spans categories, so it does not belong inside a single category's form.
+ * Every pending project request in one place. Approving is a queue job that
+ * spans projects, so it does not belong inside a single project's form.
  */
 export default function RequestsScreen({ navigation }: Props) {
-  const { categories, viewerRole, members, membershipsFor, setCategoryMembership } = useAppState();
+  const { projects, viewerRole, members, membershipsFor, setProjectMembership } = useAppState();
 
   const back = (
     <Pressable
@@ -35,7 +35,7 @@ export default function RequestsScreen({ navigation }: Props) {
           {back}
           <Text style={styles.Title}>Admins only</Text>
           <Text style={styles.Subtitle}>
-            Only organization admins can approve requests to join a category.
+            Only organization admins can approve requests to join a project.
           </Text>
         </View>
       </View>
@@ -47,12 +47,12 @@ export default function RequestsScreen({ navigation }: Props) {
     return member ? member.name : userId;
   };
 
-  // Categories with nobody waiting are dropped entirely, so the queue is exactly
+  // Projects with nobody waiting are dropped entirely, so the queue is exactly
   // as long as the work left.
-  const groups = categories
-    .map((category) => ({
-      category,
-      pending: membershipsFor(category.id).filter((entry) => entry.status === "pending"),
+  const groups = projects
+    .map((project) => ({
+      project,
+      pending: membershipsFor(project.id).filter((entry) => entry.status === "pending"),
     }))
     .filter((group) => group.pending.length > 0);
 
@@ -70,8 +70,8 @@ export default function RequestsScreen({ navigation }: Props) {
         <Text style={styles.Title}>Requests</Text>
         <Text style={styles.Subtitle}>
           {total === 0
-            ? "Members who ask to join a category will appear here for approval."
-            : `${total} ${total === 1 ? "member is" : "members are"} waiting to join a category.`}
+            ? "Members who ask to join a project will appear here for approval."
+            : `${total} ${total === 1 ? "member is" : "members are"} waiting to join a project.`}
         </Text>
 
         {groups.length === 0 && (
@@ -80,10 +80,10 @@ export default function RequestsScreen({ navigation }: Props) {
           </Text>
         )}
 
-        {groups.map(({ category, pending }) => (
-          <View key={category.id} style={styles.Group}>
+        {groups.map(({ project, pending }) => (
+          <View key={project.id} style={styles.Group}>
             <View style={styles.GroupHeader}>
-              <Text style={styles.GroupName}>{category.name}</Text>
+              <Text style={styles.GroupName}>{project.name}</Text>
               <View style={styles.GroupCount}>
                 <Text style={styles.GroupCountText}>{pending.length}</Text>
               </View>
@@ -95,18 +95,18 @@ export default function RequestsScreen({ navigation }: Props) {
 
                 <View style={styles.RowActions}>
                   <Pressable
-                    onPress={() => setCategoryMembership(category.id, entry.userId, "approved")}
+                    onPress={() => setProjectMembership(project.id, entry.userId, "approved")}
                     accessibilityRole="button"
-                    accessibilityLabel={`Approve ${memberName(entry.userId)} for ${category.name}`}
+                    accessibilityLabel={`Approve ${memberName(entry.userId)} for ${project.name}`}
                     style={({ pressed }) => [styles.ApproveButton, pressed && { opacity: 0.75 }]}
                   >
                     <Text style={styles.ApproveText}>Approve</Text>
                   </Pressable>
 
                   <Pressable
-                    onPress={() => setCategoryMembership(category.id, entry.userId, "denied")}
+                    onPress={() => setProjectMembership(project.id, entry.userId, "denied")}
                     accessibilityRole="button"
-                    accessibilityLabel={`Deny ${memberName(entry.userId)} for ${category.name}`}
+                    accessibilityLabel={`Deny ${memberName(entry.userId)} for ${project.name}`}
                     style={({ pressed }) => [styles.DenyButton, pressed && { opacity: 0.75 }]}
                   >
                     <Text style={styles.DenyText}>Deny</Text>
@@ -116,12 +116,12 @@ export default function RequestsScreen({ navigation }: Props) {
             ))}
 
             <Pressable
-              onPress={() => navigation.navigate("CategoryMembers", { categoryId: category.id })}
+              onPress={() => navigation.navigate("ProjectMembers", { projectId: project.id })}
               accessibilityRole="button"
-              accessibilityLabel={`Manage ${category.name} members`}
+              accessibilityLabel={`Manage ${project.name} members`}
               style={({ pressed }) => [styles.ManageLink, pressed && { opacity: 0.7 }]}
             >
-              <Text style={styles.ManageLinkText}>Manage {category.name} members ›</Text>
+              <Text style={styles.ManageLinkText}>Manage {project.name} members ›</Text>
             </Pressable>
           </View>
         ))}

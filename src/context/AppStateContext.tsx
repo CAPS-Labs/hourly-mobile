@@ -1,42 +1,42 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 import {
-  CATEGORIES,
-  CATEGORY_MEMBERSHIPS,
+  PROJECTS,
+  PROJECT_MEMBERSHIPS,
   CURRENT_ORGANIZATION,
   CURRENT_USER_ID,
   CURRENT_USER_ROLE,
   MEMBERS,
   ORGANIZATION_TOTAL_HOURS,
-  PROJECTS,
+  OPPORTUNITIES,
   STARTING_PERSONAL_HOURS,
 } from "../data/mockData";
 import {
   AccessStatus,
-  Category,
-  CategoryAccess,
-  CategoryMembership,
+  Project,
+  ProjectAccess,
+  ProjectMembership,
   HourEntry,
   Member,
   Organization,
   OrganizationRole,
-  Project,
+  Opportunity,
 } from "../types/models";
 
 type SubmitHoursInput = {
   hours: number;
-  categoryId: number;
+  projectId: number;
   notes: string;
 };
 
-type CategoryInput = {
+type ProjectInput = {
   name: string;
   description: string;
-  access: CategoryAccess;
+  access: ProjectAccess;
 };
 
-type ProjectInput = {
-  categoryId: number;
+type OpportunityInput = {
+  projectId: number;
   title: string;
   when: string;
   where: string;
@@ -47,83 +47,83 @@ type AppState = {
   organization: Organization;
   organizationTotalHours: number;
   personalHours: number;
-  categories: Category[];
   projects: Project[];
-  projectsInCategory: (categoryId: number) => Project[];
-  /** Admin action: add an opportunity to a category. */
-  createProject: (input: ProjectInput) => void;
-  signedUpProjectIds: number[];
-  isSignedUp: (projectId: number) => boolean;
-  toggleProjectSignUp: (projectId: number) => void;
+  opportunities: Opportunity[];
+  opportunitiesInProject: (projectId: number) => Opportunity[];
+  /** Admin action: add an opportunity to a project. */
+  createOpportunity: (input: OpportunityInput) => void;
+  signedUpOpportunityIds: number[];
+  isSignedUp: (opportunityId: number) => boolean;
+  toggleOpportunitySignUp: (opportunityId: number) => void;
   /** The current member's memberships, for the access rules in domain/access. */
-  categoryMemberships: CategoryMembership[];
-  requestCategoryAccess: (categoryId: number) => void;
+  projectMemberships: ProjectMembership[];
+  requestProjectAccess: (projectId: number) => void;
   /** A member withdrawing their own request before it is decided. */
-  cancelCategoryAccessRequest: (categoryId: number) => void;
+  cancelProjectAccessRequest: (projectId: number) => void;
 
   // Admin surface. The screens gate these behind isAdmin; they are dumb writers.
   viewerRole: OrganizationRole;
   members: Member[];
-  createCategory: (input: CategoryInput) => void;
-  updateCategory: (categoryId: number, input: Partial<CategoryInput>) => void;
-  /** Everyone's membership in one category, not just the viewer's. */
-  membershipsFor: (categoryId: number) => CategoryMembership[];
+  createProject: (input: ProjectInput) => void;
+  updateProject: (projectId: number, input: Partial<ProjectInput>) => void;
+  /** Everyone's membership in one project, not just the viewer's. */
+  membershipsFor: (projectId: number) => ProjectMembership[];
   /** Approve, deny, add or remove a member. `null` removes the membership. */
-  setCategoryMembership: (
-    categoryId: number,
+  setProjectMembership: (
+    projectId: number,
     userId: string,
     status: AccessStatus | null
   ) => void;
   submissions: HourEntry[];
-  /** Total hours per category, biggest first. Categories with no hours are omitted. */
-  hoursByCategory: { category: Category; hours: number }[];
+  /** Total hours per project, biggest first. Projects with no hours are omitted. */
+  hoursByProject: { project: Project; hours: number }[];
   submitHours: (input: SubmitHoursInput) => void;
 };
 
 const AppStateContext = createContext<AppState | null>(null);
 
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
-  const [categories, setCategories] = useState<Category[]>(CATEGORIES);
   const [projects, setProjects] = useState<Project[]>(PROJECTS);
-  const [signedUpProjectIds, setSignedUpProjectIds] = useState<number[]>([]);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>(OPPORTUNITIES);
+  const [signedUpOpportunityIds, setSignedUpOpportunityIds] = useState<number[]>([]);
   const [submissions, setSubmissions] = useState<HourEntry[]>([]);
-  const [allCategoryMemberships, setAllCategoryMemberships] =
-    useState<CategoryMembership[]>(CATEGORY_MEMBERSHIPS);
+  const [allProjectMemberships, setAllProjectMemberships] =
+    useState<ProjectMembership[]>(PROJECT_MEMBERSHIPS);
 
-  const toggleProjectSignUp = useCallback((projectId: number) => {
-    setSignedUpProjectIds((current) =>
-      current.includes(projectId)
-        ? current.filter((id) => id !== projectId)
-        : [...current, projectId]
+  const toggleOpportunitySignUp = useCallback((opportunityId: number) => {
+    setSignedUpOpportunityIds((current) =>
+      current.includes(opportunityId)
+        ? current.filter((id) => id !== opportunityId)
+        : [...current, opportunityId]
     );
   }, []);
 
-  const submitHours = useCallback(({ hours, categoryId, notes }: SubmitHoursInput) => {
+  const submitHours = useCallback(({ hours, projectId, notes }: SubmitHoursInput) => {
     setSubmissions((current) => [
-      { id: Date.now(), hours, categoryId, notes },
+      { id: Date.now(), hours, projectId, notes },
       ...current,
     ]);
   }, []);
 
   const isSignedUp = useCallback(
-    (projectId: number) => signedUpProjectIds.includes(projectId),
-    [signedUpProjectIds]
+    (opportunityId: number) => signedUpOpportunityIds.includes(opportunityId),
+    [signedUpOpportunityIds]
   );
 
-  // A category request only ever moves the viewer from "no membership" (or a
+  // A project request only ever moves the viewer from "no membership" (or a
   // previous denial) to "pending"; approving is an admin action for later.
-  const requestCategoryAccess = useCallback((categoryId: number) => {
-    setAllCategoryMemberships((current) => {
+  const requestProjectAccess = useCallback((projectId: number) => {
+    setAllProjectMemberships((current) => {
       const existing = current.find(
-        (entry) => entry.categoryId === categoryId && entry.userId === CURRENT_USER_ID
+        (entry) => entry.projectId === projectId && entry.userId === CURRENT_USER_ID
       );
 
       if (existing && existing.status !== "denied") {
         return current;
       }
 
-      const requested: CategoryMembership = {
-        categoryId,
+      const requested: ProjectMembership = {
+        projectId,
         userId: CURRENT_USER_ID,
         status: "pending",
       };
@@ -136,12 +136,12 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   // Only a request still waiting can be recalled. An approval or a denial is a
   // decision someone already made, so this never clears one by accident.
-  const cancelCategoryAccessRequest = useCallback((categoryId: number) => {
-    setAllCategoryMemberships((current) =>
+  const cancelProjectAccessRequest = useCallback((projectId: number) => {
+    setAllProjectMemberships((current) =>
       current.filter(
         (entry) =>
           !(
-            entry.categoryId === categoryId &&
+            entry.projectId === projectId &&
             entry.userId === CURRENT_USER_ID &&
             entry.status === "pending"
           )
@@ -149,46 +149,31 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
-  const categoryMemberships = useMemo(
-    () => allCategoryMemberships.filter((entry) => entry.userId === CURRENT_USER_ID),
-    [allCategoryMemberships]
+  const projectMemberships = useMemo(
+    () => allProjectMemberships.filter((entry) => entry.userId === CURRENT_USER_ID),
+    [allProjectMemberships]
   );
 
   const membershipsFor = useCallback(
-    (categoryId: number) =>
-      allCategoryMemberships.filter((entry) => entry.categoryId === categoryId),
-    [allCategoryMemberships]
+    (projectId: number) =>
+      allProjectMemberships.filter((entry) => entry.projectId === projectId),
+    [allProjectMemberships]
   );
 
-  const setCategoryMembership = useCallback(
-    (categoryId: number, userId: string, status: AccessStatus | null) => {
-      setAllCategoryMemberships((current) => {
+  const setProjectMembership = useCallback(
+    (projectId: number, userId: string, status: AccessStatus | null) => {
+      setAllProjectMemberships((current) => {
         const withoutEntry = current.filter(
-          (entry) => !(entry.categoryId === categoryId && entry.userId === userId)
+          (entry) => !(entry.projectId === projectId && entry.userId === userId)
         );
 
         return status === null
           ? withoutEntry
-          : [...withoutEntry, { categoryId, userId, status }];
+          : [...withoutEntry, { projectId, userId, status }];
       });
     },
     []
   );
-
-  const createCategory = useCallback((input: CategoryInput) => {
-    setCategories((current) => {
-      const nextId = current.reduce((max, category) => Math.max(max, category.id), 0) + 1;
-      return [...current, { id: nextId, ...input }];
-    });
-  }, []);
-
-  const updateCategory = useCallback((categoryId: number, input: Partial<CategoryInput>) => {
-    setCategories((current) =>
-      current.map((category) =>
-        category.id === categoryId ? { ...category, ...input } : category
-      )
-    );
-  }, []);
 
   const createProject = useCallback((input: ProjectInput) => {
     setProjects((current) => {
@@ -197,9 +182,24 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const projectsInCategory = useCallback(
-    (categoryId: number) => projects.filter((project) => project.categoryId === categoryId),
-    [projects]
+  const updateProject = useCallback((projectId: number, input: Partial<ProjectInput>) => {
+    setProjects((current) =>
+      current.map((project) =>
+        project.id === projectId ? { ...project, ...input } : project
+      )
+    );
+  }, []);
+
+  const createOpportunity = useCallback((input: OpportunityInput) => {
+    setOpportunities((current) => {
+      const nextId = current.reduce((max, opportunity) => Math.max(max, opportunity.id), 0) + 1;
+      return [...current, { id: nextId, ...input }];
+    });
+  }, []);
+
+  const opportunitiesInProject = useCallback(
+    (projectId: number) => opportunities.filter((opportunity) => opportunity.projectId === projectId),
+    [opportunities]
   );
 
   const personalHours = useMemo(
@@ -207,18 +207,18 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     [submissions]
   );
 
-  const hoursByCategory = useMemo(
+  const hoursByProject = useMemo(
     () =>
-      categories
-        .map((category) => ({
-          category,
+      projects
+        .map((project) => ({
+          project,
           hours: submissions
-            .filter((entry) => entry.categoryId === category.id)
+            .filter((entry) => entry.projectId === project.id)
             .reduce((sum, entry) => sum + entry.hours, 0),
         }))
         .filter((row) => row.hours > 0)
         .sort((a, b) => b.hours - a.hours),
-    [categories, submissions]
+    [projects, submissions]
   );
 
   const value: AppState = useMemo(
@@ -226,43 +226,43 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       organization: CURRENT_ORGANIZATION,
       organizationTotalHours: ORGANIZATION_TOTAL_HOURS,
       personalHours,
-      categories,
       projects,
-      projectsInCategory,
-      createProject,
-      signedUpProjectIds,
+      opportunities,
+      opportunitiesInProject,
+      createOpportunity,
+      signedUpOpportunityIds,
       isSignedUp,
-      toggleProjectSignUp,
-      categoryMemberships,
-      requestCategoryAccess,
-      cancelCategoryAccessRequest,
+      toggleOpportunitySignUp,
+      projectMemberships,
+      requestProjectAccess,
+      cancelProjectAccessRequest,
       viewerRole: CURRENT_USER_ROLE,
       members: MEMBERS,
-      createCategory,
-      updateCategory,
+      createProject,
+      updateProject,
       membershipsFor,
-      setCategoryMembership,
+      setProjectMembership,
       submissions,
-      hoursByCategory,
+      hoursByProject,
       submitHours,
     }),
     [
-      categories,
-      hoursByCategory,
-      personalHours,
-      signedUpProjectIds,
-      isSignedUp,
       projects,
-      projectsInCategory,
+      hoursByProject,
+      personalHours,
+      signedUpOpportunityIds,
+      isSignedUp,
+      opportunities,
+      opportunitiesInProject,
+      createOpportunity,
+      toggleOpportunitySignUp,
+      projectMemberships,
+      requestProjectAccess,
+      cancelProjectAccessRequest,
       createProject,
-      toggleProjectSignUp,
-      categoryMemberships,
-      requestCategoryAccess,
-      cancelCategoryAccessRequest,
-      createCategory,
-      updateCategory,
+      updateProject,
       membershipsFor,
-      setCategoryMembership,
+      setProjectMembership,
       submissions,
       submitHours,
     ]

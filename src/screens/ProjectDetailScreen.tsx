@@ -4,22 +4,22 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { Colors } from "../constants/colors";
 import { useAppState } from "../context/AppStateContext";
-import { canSignUpInCategory, canViewCategory, isAdmin, statusInCategory } from "../domain/access";
+import { canSignUpInProject, canViewProject, isAdmin, statusInProject } from "../domain/access";
 import type { ProjectsStackParamList } from "../navigation/ProjectsStack";
 
-type Props = NativeStackScreenProps<ProjectsStackParamList, "CategoryDetail">;
+type Props = NativeStackScreenProps<ProjectsStackParamList, "ProjectDetail">;
 
-export default function CategoryDetailScreen({ navigation, route }: Props) {
+export default function ProjectDetailScreen({ navigation, route }: Props) {
   const {
-    categories,
-    projectsInCategory,
+    projects,
+    opportunitiesInProject,
     isSignedUp,
-    toggleProjectSignUp,
-    categoryMemberships,
+    toggleOpportunitySignUp,
+    projectMemberships,
     viewerRole,
   } = useAppState();
 
-  const category = categories.find((entry) => entry.id === route.params.categoryId);
+  const project = projects.find((entry) => entry.id === route.params.projectId);
 
   const back = (
     <Pressable
@@ -33,25 +33,25 @@ export default function CategoryDetailScreen({ navigation, route }: Props) {
     </Pressable>
   );
 
-  // Reached if the category was removed, or if an invite-only category is no
+  // Reached if the project was removed, or if an invite-only project is no
   // longer visible to this member.
-  if (!category || !canViewCategory(category, categoryMemberships, viewerRole)) {
+  if (!project || !canViewProject(project, projectMemberships, viewerRole)) {
     return (
       <View style={styles.Screen}>
         <View style={styles.Content}>
           {back}
-          <Text style={styles.Title}>Category unavailable</Text>
+          <Text style={styles.Title}>Project unavailable</Text>
           <Text style={styles.Subtitle}>
-            This category is either no longer available or limited to members an admin has added.
+            This project is either no longer available or limited to members an admin has added.
           </Text>
         </View>
       </View>
     );
   }
 
-  const opportunities = projectsInCategory(category.id);
-  const canSignUp = canSignUpInCategory(category, categoryMemberships, viewerRole);
-  const pending = statusInCategory(category.id, categoryMemberships) === "pending";
+  const opportunities = opportunitiesInProject(project.id);
+  const canSignUp = canSignUpInProject(project, projectMemberships, viewerRole);
+  const pending = statusInProject(project.id, projectMemberships) === "pending";
   const admin = isAdmin(viewerRole);
 
   return (
@@ -63,26 +63,26 @@ export default function CategoryDetailScreen({ navigation, route }: Props) {
       >
         {back}
 
-        <Text style={styles.Title}>{category.name}</Text>
-        <Text style={styles.Subtitle}>{category.description}</Text>
+        <Text style={styles.Title}>{project.name}</Text>
+        <Text style={styles.Subtitle}>{project.description}</Text>
 
         {admin && (
           <View style={styles.AdminActions}>
             <Pressable
               onPress={() =>
-                navigation.navigate("OpportunityEditor", { categoryId: category.id })
+                navigation.navigate("OpportunityEditor", { projectId: project.id })
               }
               accessibilityRole="button"
-              accessibilityLabel={`Add an opportunity to ${category.name}`}
+              accessibilityLabel={`Add an opportunity to ${project.name}`}
               style={({ pressed }) => [styles.NewOpportunityButton, pressed && { opacity: 0.8 }]}
             >
               <Text style={styles.NewOpportunityText}>＋ New opportunity</Text>
             </Pressable>
 
             <Pressable
-              onPress={() => navigation.navigate("CategoryMembers", { categoryId: category.id })}
+              onPress={() => navigation.navigate("ProjectMembers", { projectId: project.id })}
               accessibilityRole="button"
-              accessibilityLabel={`Manage members of ${category.name}`}
+              accessibilityLabel={`Manage members of ${project.name}`}
               style={({ pressed }) => [styles.MembersButton, pressed && { opacity: 0.75 }]}
             >
               <Text style={styles.MembersButtonText}>Members</Text>
@@ -97,17 +97,17 @@ export default function CategoryDetailScreen({ navigation, route }: Props) {
             </Text>
             <Text style={styles.AccessBody}>
               {pending
-                ? `Your request to join ${category.name} is waiting for an admin to approve it. You can sign up once you are approved.`
-                : "This category is limited to its members. Request access and an admin will approve or deny it."}
+                ? `Your request to join ${project.name} is waiting for an admin to approve it. You can sign up once you are approved.`
+                : "This project is limited to its members. Request access and an admin will approve or deny it."}
             </Text>
 
             <Pressable
-              onPress={() => navigation.navigate("JoinCategories")}
+              onPress={() => navigation.navigate("JoinProjects")}
               accessibilityRole="button"
-              accessibilityLabel="Browse categories to join"
+              accessibilityLabel="Browse projects to join"
               style={({ pressed }) => [styles.AccessButton, pressed && { opacity: 0.75 }]}
             >
-              <Text style={styles.AccessButtonText}>Browse categories to join</Text>
+              <Text style={styles.AccessButtonText}>Browse projects to join</Text>
             </Pressable>
           </View>
         )}
@@ -115,28 +115,28 @@ export default function CategoryDetailScreen({ navigation, route }: Props) {
         {opportunities.length === 0 ? (
           <Text style={styles.Empty}>
             {admin
-              ? "No opportunities in this category yet. Tap New opportunity to add the first shift."
-              : "No opportunities in this category yet. Check back soon."}
+              ? "No opportunities in this project yet. Tap New opportunity to add the first shift."
+              : "No opportunities in this project yet. Check back soon."}
           </Text>
         ) : (
-          opportunities.map((project) => {
-            const signedUp = isSignedUp(project.id);
-            const spotsLeft = project.spots - (signedUp ? 1 : 0);
+          opportunities.map((opportunity) => {
+            const signedUp = isSignedUp(opportunity.id);
+            const spotsLeft = opportunity.spots - (signedUp ? 1 : 0);
 
             return (
-              <View key={project.id} style={styles.ProjectCard}>
-                <View style={styles.ProjectInfo}>
-                  <Text style={styles.ProjectTitle}>{project.title}</Text>
-                  {!!project.when && <Text style={styles.ProjectMeta}>{project.when}</Text>}
-                  {!!project.where && <Text style={styles.ProjectMeta}>{project.where}</Text>}
-                  <Text style={styles.ProjectSpots}>
+              <View key={opportunity.id} style={styles.OpportunityCard}>
+                <View style={styles.OpportunityInfo}>
+                  <Text style={styles.OpportunityTitle}>{opportunity.title}</Text>
+                  {!!opportunity.when && <Text style={styles.OpportunityMeta}>{opportunity.when}</Text>}
+                  {!!opportunity.where && <Text style={styles.OpportunityMeta}>{opportunity.where}</Text>}
+                  <Text style={styles.OpportunitySpots}>
                     {spotsLeft} {spotsLeft === 1 ? "spot" : "spots"} left
                   </Text>
                 </View>
 
                 {canSignUp ? (
                   <Pressable
-                    onPress={() => toggleProjectSignUp(project.id)}
+                    onPress={() => toggleOpportunitySignUp(opportunity.id)}
                     style={({ pressed }) => [
                       styles.SignUpButton,
                       signedUp && styles.SignUpButtonActive,
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
-  ProjectCard: {
+  OpportunityCard: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: Colors.card,
@@ -268,21 +268,21 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
   },
-  ProjectInfo: {
+  OpportunityInfo: {
     flex: 1,
     paddingRight: 12,
   },
-  ProjectTitle: {
+  OpportunityTitle: {
     color: Colors.text,
     fontSize: 16,
     fontWeight: "600",
   },
-  ProjectMeta: {
+  OpportunityMeta: {
     color: Colors.secondaryText,
     fontSize: 13,
     marginTop: 4,
   },
-  ProjectSpots: {
+  OpportunitySpots: {
     color: "#4A90E2",
     fontSize: 12,
     marginTop: 6,

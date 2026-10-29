@@ -6,15 +6,15 @@ import { Colors } from "../constants/colors";
 import { useAppState } from "../context/AppStateContext";
 import { isAdmin } from "../domain/access";
 import type { ProjectsStackParamList } from "../navigation/ProjectsStack";
-import { CategoryAccess } from "../types/models";
+import { ProjectAccess } from "../types/models";
 
-type Props = NativeStackScreenProps<ProjectsStackParamList, "CategoryEditor">;
+type Props = NativeStackScreenProps<ProjectsStackParamList, "ProjectEditor">;
 
-const ACCESS_OPTIONS: { value: CategoryAccess; label: string; detail: string }[] = [
+const ACCESS_OPTIONS: { value: ProjectAccess; label: string; detail: string }[] = [
   {
     value: "open",
     label: "Everyone",
-    detail: "Any member can see this category and sign up.",
+    detail: "Any member can see this project and sign up.",
   },
   {
     value: "request",
@@ -28,15 +28,15 @@ const ACCESS_OPTIONS: { value: CategoryAccess; label: string; detail: string }[]
   },
 ];
 
-export default function CategoryEditorScreen({ navigation, route }: Props) {
-  const { categories, createCategory, updateCategory, viewerRole, membershipsFor } = useAppState();
+export default function ProjectEditorScreen({ navigation, route }: Props) {
+  const { projects, createProject, updateProject, viewerRole, membershipsFor } = useAppState();
 
-  const categoryId = route.params?.categoryId;
-  const category = categories.find((entry) => entry.id === categoryId);
+  const projectId = route.params?.projectId;
+  const project = projects.find((entry) => entry.id === projectId);
 
-  const [name, setName] = useState(category ? category.name : "");
-  const [description, setDescription] = useState(category ? category.description : "");
-  const [access, setAccess] = useState<CategoryAccess>(category ? category.access : "open");
+  const [name, setName] = useState(project ? project.name : "");
+  const [description, setDescription] = useState(project ? project.description : "");
+  const [access, setAccess] = useState<ProjectAccess>(project ? project.access : "open");
 
   const back = (
     <Pressable
@@ -57,27 +57,27 @@ export default function CategoryEditorScreen({ navigation, route }: Props) {
           {back}
           <Text style={styles.Title}>Admins only</Text>
           <Text style={styles.Subtitle}>
-            Only organization admins can create categories or change who sees them.
+            Only organization admins can create projects or change who sees them.
           </Text>
         </View>
       </View>
     );
   }
 
-  if (categoryId !== undefined && !category) {
+  if (projectId !== undefined && !project) {
     return (
       <View style={styles.Screen}>
         <View style={styles.Content}>
           {back}
-          <Text style={styles.Title}>Category unavailable</Text>
-          <Text style={styles.Subtitle}>This category no longer exists.</Text>
+          <Text style={styles.Title}>Project unavailable</Text>
+          <Text style={styles.Subtitle}>This project no longer exists.</Text>
         </View>
       </View>
     );
   }
 
-  const approvedCount = category
-    ? membershipsFor(category.id).filter((entry) => entry.status === "approved").length
+  const approvedCount = project
+    ? membershipsFor(project.id).filter((entry) => entry.status === "approved").length
     : 0;
 
   const trimmedName = name.trim();
@@ -90,10 +90,10 @@ export default function CategoryEditorScreen({ navigation, route }: Props) {
 
     const input = { name: trimmedName, description: description.trim(), access };
 
-    if (category) {
-      updateCategory(category.id, input);
+    if (project) {
+      updateProject(project.id, input);
     } else {
-      createCategory(input);
+      createProject(input);
     }
 
     navigation.goBack();
@@ -109,11 +109,11 @@ export default function CategoryEditorScreen({ navigation, route }: Props) {
       >
         {back}
 
-        <Text style={styles.Title}>{category ? "Edit category" : "New category"}</Text>
+        <Text style={styles.Title}>{project ? "Edit project" : "New project"}</Text>
         <Text style={styles.Subtitle}>
-          {category
-            ? "Rename the category and change who can see it."
-            : "Name the category and choose who can see it. Opportunities and members come next."}
+          {project
+            ? "Rename the project and change who can see it."
+            : "Name the project and choose who can see it. Opportunities and members come next."}
         </Text>
 
         <Text style={styles.FieldLabel}>Name</Text>
@@ -130,13 +130,13 @@ export default function CategoryEditorScreen({ navigation, route }: Props) {
         <TextInput
           value={description}
           onChangeText={setDescription}
-          placeholder="What members do in this category"
+          placeholder="What members do in this project"
           placeholderTextColor="#777"
           multiline
           style={[styles.FieldInput, styles.DescriptionInput]}
         />
 
-        <Text style={styles.FieldLabel}>Who can see this category?</Text>
+        <Text style={styles.FieldLabel}>Who can see this project?</Text>
 
         {ACCESS_OPTIONS.map((option) => {
           const selected = option.value === access;
@@ -165,7 +165,7 @@ export default function CategoryEditorScreen({ navigation, route }: Props) {
           );
         })}
 
-        {category ? (
+        {project ? (
           <View style={styles.ModeCard}>
             <Text style={styles.ModeCardTitle}>
               {access === "open" ? "Everyone has access" : `${approvedCount} with access`}
@@ -173,7 +173,7 @@ export default function CategoryEditorScreen({ navigation, route }: Props) {
 
             <Text style={styles.ModeCardBody}>
               {access === "open"
-                ? `Every member can see ${category.name} and sign up, so there is nobody to approve.`
+                ? `Every member can see ${project.name} and sign up, so there is nobody to approve.`
                 : access === "request"
                 ? `Members can ask to join. Requests land in the Requests inbox and you approve each person. ${
                     approvedCount === 0
@@ -181,16 +181,16 @@ export default function CategoryEditorScreen({ navigation, route }: Props) {
                       : `${approvedCount} ${approvedCount === 1 ? "person has" : "people have"} access.`
                   }`
                 : approvedCount === 0
-                ? "Nobody has access yet. Invite the people who should see this category, or it stays invisible to every member."
+                ? "Nobody has access yet. Invite the people who should see this project, or it stays invisible to every member."
                 : `Only ${
                     approvedCount === 1 ? "the one person" : `these ${approvedCount} people`
-                  } you added can see this category.`}
+                  } you added can see this project.`}
             </Text>
 
             <Pressable
-              onPress={() => navigation.navigate("CategoryMembers", { categoryId: category.id })}
+              onPress={() => navigation.navigate("ProjectMembers", { projectId: project.id })}
               accessibilityRole="button"
-              accessibilityLabel={`Manage members of ${category.name}`}
+              accessibilityLabel={`Manage members of ${project.name}`}
               style={({ pressed }) => [styles.ManageButton, pressed && { opacity: 0.75 }]}
             >
               <Text style={styles.ManageButtonText}>Manage members</Text>
@@ -199,7 +199,7 @@ export default function CategoryEditorScreen({ navigation, route }: Props) {
         ) : (
           access !== "open" && (
             <Text style={styles.Hint}>
-              You can add members once the category is saved — until then there is nobody to invite
+              You can add members once the project is saved — until then there is nobody to invite
               or approve.
             </Text>
           )
@@ -209,7 +209,7 @@ export default function CategoryEditorScreen({ navigation, route }: Props) {
           disabled={!canSave}
           onPress={save}
           accessibilityRole="button"
-          accessibilityLabel={category ? "Save changes" : "Create category"}
+          accessibilityLabel={project ? "Save changes" : "Create project"}
           style={({ pressed }) => [
             styles.SaveButton,
             !canSave && styles.SaveButtonDisabled,
@@ -217,11 +217,11 @@ export default function CategoryEditorScreen({ navigation, route }: Props) {
           ]}
         >
           <Text style={styles.SaveButtonText}>
-            {category ? "Save changes" : "Create category"}
+            {project ? "Save changes" : "Create project"}
           </Text>
         </Pressable>
 
-        {!canSave && <Text style={styles.Hint}>Give the category a name to save it.</Text>}
+        {!canSave && <Text style={styles.Hint}>Give the project a name to save it.</Text>}
       </ScrollView>
     </View>
   );

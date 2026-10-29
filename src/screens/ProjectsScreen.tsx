@@ -7,8 +7,8 @@ import { useAppState } from "../context/AppStateContext";
 import {
   accessLabel,
   isAdmin,
-  joinedCategories,
-  joinableCategories,
+  joinedProjects,
+  joinableProjects,
 } from "../domain/access";
 import type { ProjectsStackParamList } from "../navigation/ProjectsStack";
 
@@ -17,21 +17,21 @@ type Props = NativeStackScreenProps<ProjectsStackParamList, "ProjectsHome">;
 export default function ProjectsScreen({ navigation }: Props) {
   const {
     organization,
-    categories,
-    projectsInCategory,
+    projects,
+    opportunitiesInProject,
     isSignedUp,
-    categoryMemberships,
+    projectMemberships,
     viewerRole,
     membershipsFor,
   } = useAppState();
 
   const admin = isAdmin(viewerRole);
 
-  // The list holds what the viewer can use today. Categories that still need an
+  // The list holds what the viewer can use today. Projects that still need an
   // approval live on the join screen, reached from the card at the bottom, so no
   // row here has to explain why it is locked.
-  const listed = joinedCategories(categories, categoryMemberships, viewerRole);
-  const joinable = joinableCategories(categories, categoryMemberships, viewerRole);
+  const listed = joinedProjects(projects, projectMemberships, viewerRole);
+  const joinable = joinableProjects(projects, projectMemberships, viewerRole);
 
   return (
     <View style={styles.Screen}>
@@ -45,9 +45,9 @@ export default function ProjectsScreen({ navigation }: Props) {
 
           {admin && (
             <Pressable
-              onPress={() => navigation.navigate("CategoryEditor", {})}
+              onPress={() => navigation.navigate("ProjectEditor", {})}
               accessibilityRole="button"
-              accessibilityLabel="Create a category"
+              accessibilityLabel="Create a project"
               style={({ pressed }) => [styles.NewButton, pressed && { opacity: 0.75 }]}
             >
               <Text style={styles.NewButtonText}>＋ New</Text>
@@ -56,33 +56,33 @@ export default function ProjectsScreen({ navigation }: Props) {
         </View>
 
         <Text style={styles.Subtitle}>
-          Browse opportunities with {organization.name} by category. Open a category to see its
+          Browse opportunities with {organization.name} by project. Open a project to see its
           shifts and sign up.
         </Text>
 
         {listed.length === 0 && (
-          <Text style={styles.Empty}>You are not in any categories yet.</Text>
+          <Text style={styles.Empty}>You are not in any projects yet.</Text>
         )}
 
-        {listed.map((category) => {
-          const opportunities = projectsInCategory(category.id);
-          const signedUpCount = opportunities.filter((project) => isSignedUp(project.id)).length;
+        {listed.map((project) => {
+          const opportunities = opportunitiesInProject(project.id);
+          const signedUpCount = opportunities.filter((opportunity) => isSignedUp(opportunity.id)).length;
           const pendingCount = admin
-            ? membershipsFor(category.id).filter((entry) => entry.status === "pending").length
+            ? membershipsFor(project.id).filter((entry) => entry.status === "pending").length
             : 0;
 
           return (
-            <View key={category.id} style={styles.CategoryCard}>
+            <View key={project.id} style={styles.ProjectCard}>
               <Pressable
-                onPress={() => navigation.navigate("CategoryDetail", { categoryId: category.id })}
+                onPress={() => navigation.navigate("ProjectDetail", { projectId: project.id })}
                 accessibilityRole="button"
-                accessibilityLabel={`Open ${category.name}`}
-                style={({ pressed }) => [styles.CategoryMain, pressed && styles.CardPressed]}
+                accessibilityLabel={`Open ${project.name}`}
+                style={({ pressed }) => [styles.ProjectMain, pressed && styles.CardPressed]}
               >
-                <View style={styles.CategoryInfo}>
-                  <Text style={styles.CategoryName}>{category.name}</Text>
-                  <Text style={styles.CategoryDescription}>{category.description}</Text>
-                  <Text style={styles.CategoryMeta}>
+                <View style={styles.ProjectInfo}>
+                  <Text style={styles.ProjectName}>{project.name}</Text>
+                  <Text style={styles.ProjectDescription}>{project.description}</Text>
+                  <Text style={styles.ProjectMeta}>
                     {opportunities.length === 0
                       ? "No opportunities yet"
                       : `${opportunities.length} ${
@@ -98,7 +98,7 @@ export default function ProjectsScreen({ navigation }: Props) {
               {admin && (
                 <View style={styles.AccessRow}>
                   <View style={styles.LockChip}>
-                    <Text style={styles.LockChipText}>{accessLabel(category.access)}</Text>
+                    <Text style={styles.LockChipText}>{accessLabel(project.access)}</Text>
                   </View>
 
                   <View style={styles.AdminActions}>
@@ -106,7 +106,7 @@ export default function ProjectsScreen({ navigation }: Props) {
                       <Pressable
                         onPress={() => navigation.navigate("Requests")}
                         accessibilityRole="button"
-                        accessibilityLabel={`${pendingCount} pending requests for ${category.name}`}
+                        accessibilityLabel={`${pendingCount} pending requests for ${project.name}`}
                         style={({ pressed }) => [styles.PendingChip, pressed && { opacity: 0.75 }]}
                       >
                         <Text style={styles.PendingChipText}>{pendingCount} pending</Text>
@@ -114,9 +114,9 @@ export default function ProjectsScreen({ navigation }: Props) {
                     )}
 
                     <Pressable
-                      onPress={() => navigation.navigate("CategoryMembers", { categoryId: category.id })}
+                      onPress={() => navigation.navigate("ProjectMembers", { projectId: project.id })}
                       accessibilityRole="button"
-                      accessibilityLabel={`Manage members of ${category.name}`}
+                      accessibilityLabel={`Manage members of ${project.name}`}
                       style={({ pressed }) => [styles.EditButton, pressed && { opacity: 0.75 }]}
                     >
                       <Text style={styles.EditButtonText}>Members</Text>
@@ -124,10 +124,10 @@ export default function ProjectsScreen({ navigation }: Props) {
 
                     <Pressable
                       onPress={() =>
-                        navigation.navigate("CategoryEditor", { categoryId: category.id })
+                        navigation.navigate("ProjectEditor", { projectId: project.id })
                       }
                       accessibilityRole="button"
-                      accessibilityLabel={`Edit ${category.name}`}
+                      accessibilityLabel={`Edit ${project.name}`}
                       style={({ pressed }) => [styles.EditButton, pressed && { opacity: 0.75 }]}
                     >
                       <Text style={styles.EditButtonText}>Edit</Text>
@@ -141,17 +141,17 @@ export default function ProjectsScreen({ navigation }: Props) {
 
         {!admin && joinable.length > 0 && (
           <Pressable
-            onPress={() => navigation.navigate("JoinCategories")}
+            onPress={() => navigation.navigate("JoinProjects")}
             accessibilityRole="button"
-            accessibilityLabel="Browse categories to join"
+            accessibilityLabel="Browse projects to join"
             style={({ pressed }) => [styles.JoinCard, pressed && styles.CardPressed]}
           >
-            <View style={styles.CategoryInfo}>
-              <Text style={styles.JoinTitle}>Explore other categories</Text>
+            <View style={styles.ProjectInfo}>
+              <Text style={styles.JoinTitle}>Explore other projects</Text>
               <Text style={styles.JoinBody}>
                 {joinable.length === 1
-                  ? "1 category open to requests"
-                  : `${joinable.length} categories open to requests`}
+                  ? "1 project open to requests"
+                  : `${joinable.length} projects open to requests`}
               </Text>
             </View>
 
@@ -207,35 +207,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-  CategoryCard: {
+  ProjectCard: {
     backgroundColor: Colors.card,
     borderRadius: 14,
     padding: 16,
     marginBottom: 12,
   },
-  CategoryMain: {
+  ProjectMain: {
     flexDirection: "row",
     alignItems: "center",
   },
   CardPressed: {
     opacity: 0.8,
   },
-  CategoryInfo: {
+  ProjectInfo: {
     flex: 1,
     paddingRight: 12,
   },
-  CategoryName: {
+  ProjectName: {
     color: Colors.text,
     fontSize: 17,
     fontWeight: "600",
   },
-  CategoryDescription: {
+  ProjectDescription: {
     color: Colors.secondaryText,
     fontSize: 13,
     lineHeight: 18,
     marginTop: 4,
   },
-  CategoryMeta: {
+  ProjectMeta: {
     color: "#4A90E2",
     fontSize: 12,
     marginTop: 8,

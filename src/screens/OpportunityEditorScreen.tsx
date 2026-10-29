@@ -10,10 +10,10 @@ import type { ProjectsStackParamList } from "../navigation/ProjectsStack";
 type Props = NativeStackScreenProps<ProjectsStackParamList, "OpportunityEditor">;
 
 export default function OpportunityEditorScreen({ navigation, route }: Props) {
-  const { categories, createProject, viewerRole } = useAppState();
+  const { projects, createOpportunity, viewerRole } = useAppState();
 
-  const { categoryId } = route.params;
-  const category = categories.find((entry) => entry.id === categoryId);
+  const { projectId } = route.params;
+  const project = projects.find((entry) => entry.id === projectId);
 
   const [title, setTitle] = useState("");
   const [when, setWhen] = useState("");
@@ -46,13 +46,13 @@ export default function OpportunityEditorScreen({ navigation, route }: Props) {
     );
   }
 
-  if (!category) {
+  if (!project) {
     return (
       <View style={styles.Screen}>
         <View style={styles.Content}>
           {back}
-          <Text style={styles.Title}>Category unavailable</Text>
-          <Text style={styles.Subtitle}>This category no longer exists.</Text>
+          <Text style={styles.Title}>Project unavailable</Text>
+          <Text style={styles.Subtitle}>This project no longer exists.</Text>
         </View>
       </View>
     );
@@ -67,8 +67,8 @@ export default function OpportunityEditorScreen({ navigation, route }: Props) {
       return;
     }
 
-    createProject({
-      categoryId: category.id,
+    createOpportunity({
+      projectId: project.id,
       title: trimmedTitle,
       when: when.trim(),
       where: where.trim(),
@@ -90,7 +90,7 @@ export default function OpportunityEditorScreen({ navigation, route }: Props) {
 
         <Text style={styles.Title}>New opportunity</Text>
         <Text style={styles.Subtitle}>
-          Members of {category.name} will see this shift and can sign up for it.
+          Members of {project.name} will see this shift and can sign up for it.
         </Text>
 
         <Text style={styles.FieldLabel}>Title</Text>

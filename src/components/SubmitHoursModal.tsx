@@ -3,7 +3,7 @@ import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-nativ
 
 import { Colors } from "../constants/colors";
 import { useAppState } from "../context/AppStateContext";
-import { memberCategories } from "../domain/access";
+import { memberProjects } from "../domain/access";
 
 type SubmitHoursModalProps = {
   visible: boolean;
@@ -11,25 +11,25 @@ type SubmitHoursModalProps = {
 };
 
 export default function SubmitHoursModal({ visible, onClose }: SubmitHoursModalProps) {
-  const { organization, categories, categoryMemberships, submitHours } = useAppState();
+  const { organization, projects, projectMemberships, submitHours } = useAppState();
 
   const [hoursInput, setHoursInput] = useState("");
   const [notesInput, setNotesInput] = useState("");
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [pickerVisible, setPickerVisible] = useState(false);
 
-  // Only categories this member actually serves in can receive hours: open ones
+  // Only projects this member actually serves in can receive hours: open ones
   // plus the restricted ones they have been approved for.
-  const options = memberCategories(categories, categoryMemberships);
-  const selectedCategory = options.find((category) => category.id === selectedCategoryId) ?? null;
+  const options = memberProjects(projects, projectMemberships);
+  const selectedProject = options.find((project) => project.id === selectedProjectId) ?? null;
 
   const hours = Number(hoursInput);
-  const canSubmit = hours > 0 && selectedCategory !== null;
+  const canSubmit = hours > 0 && selectedProject !== null;
 
   const reset = () => {
     setHoursInput("");
     setNotesInput("");
-    setSelectedCategoryId(null);
+    setSelectedProjectId(null);
     setPickerVisible(false);
   };
 
@@ -39,11 +39,11 @@ export default function SubmitHoursModal({ visible, onClose }: SubmitHoursModalP
   };
 
   const handleSubmit = () => {
-    if (!canSubmit || !selectedCategory) {
+    if (!canSubmit || !selectedProject) {
       return;
     }
 
-    submitHours({ hours, categoryId: selectedCategory.id, notes: notesInput.trim() });
+    submitHours({ hours, projectId: selectedProject.id, notes: notesInput.trim() });
     close();
   };
 
@@ -65,13 +65,13 @@ export default function SubmitHoursModal({ visible, onClose }: SubmitHoursModalP
           style={styles.FieldInput}
         />
 
-        <Text style={styles.FieldLabel}>Category</Text>
+        <Text style={styles.FieldLabel}>Project</Text>
         <Pressable
           onPress={() => setPickerVisible(true)}
           style={({ pressed }) => [styles.SelectInput, pressed && { opacity: 0.8 }]}
         >
-          <Text style={selectedCategory ? styles.SelectValue : styles.SelectPlaceholder}>
-            {selectedCategory ? selectedCategory.name : "Choose a category"}
+          <Text style={selectedProject ? styles.SelectValue : styles.SelectPlaceholder}>
+            {selectedProject ? selectedProject.name : "Choose a project"}
           </Text>
         </Pressable>
 
@@ -117,19 +117,19 @@ export default function SubmitHoursModal({ visible, onClose }: SubmitHoursModalP
       >
         <View style={styles.PickerBackdrop}>
           <View style={styles.PickerSheet}>
-            <Text style={styles.PickerTitle}>Select a Category</Text>
+            <Text style={styles.PickerTitle}>Select a Project</Text>
 
             {options.length === 0 && (
               <Text style={styles.PickerEmpty}>
-                You are not in any categories yet. Ask an admin to add you to one.
+                You are not in any projects yet. Ask an admin to add you to one.
               </Text>
             )}
 
-            {options.map((category) => (
+            {options.map((project) => (
               <Pressable
-                key={category.id}
+                key={project.id}
                 onPress={() => {
-                  setSelectedCategoryId(category.id);
+                  setSelectedProjectId(project.id);
                   setPickerVisible(false);
                 }}
                 style={({ pressed }) => (pressed ? { opacity: 0.7 } : undefined)}
@@ -137,10 +137,10 @@ export default function SubmitHoursModal({ visible, onClose }: SubmitHoursModalP
                 <Text
                   style={[
                     styles.PickerOption,
-                    selectedCategoryId === category.id && styles.PickerOptionSelected,
+                    selectedProjectId === project.id && styles.PickerOptionSelected,
                   ]}
                 >
-                  {category.name}
+                  {project.name}
                 </Text>
               </Pressable>
             ))}

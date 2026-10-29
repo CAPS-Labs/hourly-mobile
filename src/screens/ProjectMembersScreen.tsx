@@ -7,17 +7,17 @@ import { useAppState } from "../context/AppStateContext";
 import { accessLabel, isAdmin } from "../domain/access";
 import type { ProjectsStackParamList } from "../navigation/ProjectsStack";
 
-type Props = NativeStackScreenProps<ProjectsStackParamList, "CategoryMembers">;
+type Props = NativeStackScreenProps<ProjectsStackParamList, "ProjectMembers">;
 
 /**
- * One category's roster: who is waiting, who is in, and who can be added.
- * Kept separate from the category form so approvals commit immediately instead
+ * One project's roster: who is waiting, who is in, and who can be added.
+ * Kept separate from the project form so approvals commit immediately instead
  * of waiting on a Save button that the form's text fields need.
  */
-export default function CategoryMembersScreen({ navigation, route }: Props) {
-  const { categories, viewerRole, members, membershipsFor, setCategoryMembership } = useAppState();
+export default function ProjectMembersScreen({ navigation, route }: Props) {
+  const { projects, viewerRole, members, membershipsFor, setProjectMembership } = useAppState();
 
-  const category = categories.find((entry) => entry.id === route.params.categoryId);
+  const project = projects.find((entry) => entry.id === route.params.projectId);
 
   const back = (
     <Pressable
@@ -38,20 +38,20 @@ export default function CategoryMembersScreen({ navigation, route }: Props) {
           {back}
           <Text style={styles.Title}>Admins only</Text>
           <Text style={styles.Subtitle}>
-            Only organization admins can manage who is in a category.
+            Only organization admins can manage who is in a project.
           </Text>
         </View>
       </View>
     );
   }
 
-  if (!category) {
+  if (!project) {
     return (
       <View style={styles.Screen}>
         <View style={styles.Content}>
           {back}
-          <Text style={styles.Title}>Category unavailable</Text>
-          <Text style={styles.Subtitle}>This category no longer exists.</Text>
+          <Text style={styles.Title}>Project unavailable</Text>
+          <Text style={styles.Subtitle}>This project no longer exists.</Text>
         </View>
       </View>
     );
@@ -62,7 +62,7 @@ export default function CategoryMembersScreen({ navigation, route }: Props) {
     return member ? member.name : userId;
   };
 
-  const memberships = membershipsFor(category.id);
+  const memberships = membershipsFor(project.id);
   const pendingRequests = memberships.filter((entry) => entry.status === "pending");
   const approvedMembers = memberships.filter((entry) => entry.status === "approved");
 
@@ -87,21 +87,21 @@ export default function CategoryMembersScreen({ navigation, route }: Props) {
 
         <Text style={styles.Title}>Members</Text>
         <Text style={styles.Subtitle}>
-          {category.name} · {accessLabel(category.access)}
+          {project.name} · {accessLabel(project.access)}
         </Text>
 
-        {category.access === "open" ? (
+        {project.access === "open" ? (
           <View style={styles.Notice}>
             <Text style={styles.NoticeTitle}>Everyone already has access</Text>
             <Text style={styles.NoticeBody}>
-              {category.name} is open to every member, so there is nobody to approve and nothing to
+              {project.name} is open to every member, so there is nobody to approve and nothing to
               grant. Switch it to Requests or Invite only to limit who can take part.
             </Text>
 
             <Pressable
-              onPress={() => navigation.navigate("CategoryEditor", { categoryId: category.id })}
+              onPress={() => navigation.navigate("ProjectEditor", { projectId: project.id })}
               accessibilityRole="button"
-              accessibilityLabel={`Change access for ${category.name}`}
+              accessibilityLabel={`Change access for ${project.name}`}
               style={({ pressed }) => [styles.NoticeButton, pressed && { opacity: 0.75 }]}
             >
               <Text style={styles.NoticeButtonText}>Change access</Text>
@@ -109,7 +109,7 @@ export default function CategoryMembersScreen({ navigation, route }: Props) {
           </View>
         ) : (
           <>
-            {category.access === "request" && (
+            {project.access === "request" && (
               <>
                 <Text style={styles.SectionLabel}>
                   Pending requests{pendingRequests.length > 0 ? ` (${pendingRequests.length})` : ""}
@@ -125,7 +125,7 @@ export default function CategoryMembersScreen({ navigation, route }: Props) {
                       <View style={styles.MemberActions}>
                         <Pressable
                           onPress={() =>
-                            setCategoryMembership(category.id, entry.userId, "approved")
+                            setProjectMembership(project.id, entry.userId, "approved")
                           }
                           accessibilityRole="button"
                           accessibilityLabel={`Approve ${memberName(entry.userId)}`}
@@ -138,7 +138,7 @@ export default function CategoryMembersScreen({ navigation, route }: Props) {
                         </Pressable>
 
                         <Pressable
-                          onPress={() => setCategoryMembership(category.id, entry.userId, "denied")}
+                          onPress={() => setProjectMembership(project.id, entry.userId, "denied")}
                           accessibilityRole="button"
                           accessibilityLabel={`Deny ${memberName(entry.userId)}`}
                           style={({ pressed }) => [styles.DenyButton, pressed && { opacity: 0.75 }]}
@@ -158,8 +158,8 @@ export default function CategoryMembersScreen({ navigation, route }: Props) {
 
             {approvedMembers.length === 0 ? (
               <Text style={styles.Hint}>
-                {category.access === "invite"
-                  ? "Nobody yet. Add someone below and only they will see this category."
+                {project.access === "invite"
+                  ? "Nobody yet. Add someone below and only they will see this project."
                   : "Nobody has been approved yet."}
               </Text>
             ) : (
@@ -168,7 +168,7 @@ export default function CategoryMembersScreen({ navigation, route }: Props) {
                   <Text style={styles.MemberName}>{memberName(entry.userId)}</Text>
 
                   <Pressable
-                    onPress={() => setCategoryMembership(category.id, entry.userId, null)}
+                    onPress={() => setProjectMembership(project.id, entry.userId, null)}
                     accessibilityRole="button"
                     accessibilityLabel={`Remove ${memberName(entry.userId)}`}
                     style={({ pressed }) => [styles.DenyButton, pressed && { opacity: 0.75 }]}
@@ -188,7 +188,7 @@ export default function CategoryMembersScreen({ navigation, route }: Props) {
                     <Text style={styles.MemberName}>{member.name}</Text>
 
                     <Pressable
-                      onPress={() => setCategoryMembership(category.id, member.id, "approved")}
+                      onPress={() => setProjectMembership(project.id, member.id, "approved")}
                       accessibilityRole="button"
                       accessibilityLabel={`Add ${member.name}`}
                       style={({ pressed }) => [styles.AddButton, pressed && { opacity: 0.75 }]}

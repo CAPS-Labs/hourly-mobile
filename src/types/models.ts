@@ -14,25 +14,25 @@ export type Organization = {
 };
 
 /**
- * Who can see a category and sign up for what is inside it.
+ * Who can see a project and sign up for what is inside it.
  * - "open":    every member can see it and sign up.
  * - "request": every member can see it, but must be approved to sign up.
  * - "invite":  only approved members can see it at all.
  */
-export type CategoryAccess = "open" | "request" | "invite";
+export type ProjectAccess = "open" | "request" | "invite";
 
 export type AccessStatus = "pending" | "approved" | "denied";
 
-export type Category = {
+export type Project = {
   id: number;
   name: string;
   description: string;
-  access: CategoryAccess;
+  access: ProjectAccess;
 };
 
-/** A member's standing inside one category. */
-export type CategoryMembership = {
-  categoryId: number;
+/** A member's standing inside one project. */
+export type ProjectMembership = {
+  projectId: number;
   userId: string;
   status: AccessStatus;
 };
@@ -43,9 +43,9 @@ export type Member = {
   name: string;
 };
 
-export type Project = {
+export type Opportunity = {
   id: number;
-  categoryId: number;
+  projectId: number;
   title: string;
   when: string;
   where: string;
@@ -55,7 +55,7 @@ export type Project = {
 export type HourEntry = {
   id: number;
   hours: number;
-  /** The category (club) the hours were served in. */
-  categoryId: number;
+  /** The project the hours were served in. */
+  projectId: number;
   notes: string;
 };

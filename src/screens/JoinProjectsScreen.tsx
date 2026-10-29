@@ -7,25 +7,25 @@ import { useAppState } from "../context/AppStateContext";
 import {
   canRequestAccess,
   isAdmin,
-  joinableCategories,
-  statusInCategory,
+  joinableProjects,
+  statusInProject,
 } from "../domain/access";
 import type { ProjectsStackParamList } from "../navigation/ProjectsStack";
 
-type Props = NativeStackScreenProps<ProjectsStackParamList, "JoinCategories">;
+type Props = NativeStackScreenProps<ProjectsStackParamList, "JoinProjects">;
 
 /**
- * The one place a member asks to join a category. The Projects list only shows
- * categories they are already in, so registering interest is a separate errand
+ * The one place a member asks to join a project. The Projects list only shows
+ * projects they are already in, so registering interest is a separate errand
  * rather than a button attached to every locked row.
  */
-export default function JoinCategoriesScreen({ navigation }: Props) {
+export default function JoinProjectsScreen({ navigation }: Props) {
   const {
-    categories,
-    categoryMemberships,
+    projects,
+    projectMemberships,
     viewerRole,
-    requestCategoryAccess,
-    cancelCategoryAccessRequest,
+    requestProjectAccess,
+    cancelProjectAccessRequest,
   } = useAppState();
 
   const back = (
@@ -48,20 +48,20 @@ export default function JoinCategoriesScreen({ navigation }: Props) {
           {back}
           <Text style={styles.Title}>Nothing to join</Text>
           <Text style={styles.Subtitle}>
-            As an admin you already have access to every category. Use Projects to change a
-            category's access, or add members from its Members screen.
+            As an admin you already have access to every project. Use Projects to change a
+            project's access, or add members from its Members screen.
           </Text>
         </View>
       </View>
     );
   }
 
-  const candidates = joinableCategories(categories, categoryMemberships, viewerRole);
-  const available = candidates.filter((category) =>
-    canRequestAccess(category, categoryMemberships, viewerRole)
+  const candidates = joinableProjects(projects, projectMemberships, viewerRole);
+  const available = candidates.filter((project) =>
+    canRequestAccess(project, projectMemberships, viewerRole)
   );
   const waiting = candidates.filter(
-    (category) => statusInCategory(category.id, categoryMemberships) === "pending"
+    (project) => statusInProject(project.id, projectMemberships) === "pending"
   );
 
   return (
@@ -73,15 +73,15 @@ export default function JoinCategoriesScreen({ navigation }: Props) {
       >
         {back}
 
-        <Text style={styles.Title}>Join a category</Text>
+        <Text style={styles.Title}>Join a project</Text>
         <Text style={styles.Subtitle}>
-          Ask to join a category here. An admin approves or denies each request, and you can sign
+          Ask to join a project here. An admin approves or denies each request, and you can sign
           up for its opportunities once you are in.
         </Text>
 
         {available.length === 0 && waiting.length === 0 && (
           <Text style={styles.Empty}>
-            Nothing is open to join right now. An admin can add you to a category directly.
+            Nothing is open to join right now. An admin can add you to a project directly.
           </Text>
         )}
 
@@ -89,14 +89,14 @@ export default function JoinCategoriesScreen({ navigation }: Props) {
           <>
             <Text style={styles.SectionTitle}>Available to join</Text>
 
-            {available.map((category) => {
-              const denied = statusInCategory(category.id, categoryMemberships) === "denied";
+            {available.map((project) => {
+              const denied = statusInProject(project.id, projectMemberships) === "denied";
 
               return (
-                <View key={category.id} style={styles.Card}>
+                <View key={project.id} style={styles.Card}>
                   <View style={styles.CardInfo}>
-                    <Text style={styles.CardName}>{category.name}</Text>
-                    <Text style={styles.CardBody}>{category.description}</Text>
+                    <Text style={styles.CardName}>{project.name}</Text>
+                    <Text style={styles.CardBody}>{project.description}</Text>
                     {denied && (
                       <Text style={styles.DeniedNote}>
                         Your last request was denied. You can ask again.
@@ -105,9 +105,9 @@ export default function JoinCategoriesScreen({ navigation }: Props) {
                   </View>
 
                   <Pressable
-                    onPress={() => requestCategoryAccess(category.id)}
+                    onPress={() => requestProjectAccess(project.id)}
                     accessibilityRole="button"
-                    accessibilityLabel={`Request to join ${category.name}`}
+                    accessibilityLabel={`Request to join ${project.name}`}
                     style={({ pressed }) => [styles.RequestButton, pressed && { opacity: 0.75 }]}
                   >
                     <Text style={styles.RequestButtonText}>
@@ -124,10 +124,10 @@ export default function JoinCategoriesScreen({ navigation }: Props) {
           <>
             <Text style={styles.SectionTitle}>Waiting for approval</Text>
 
-            {waiting.map((category) => (
-              <View key={category.id} style={styles.Card}>
+            {waiting.map((project) => (
+              <View key={project.id} style={styles.Card}>
                 <View style={styles.CardInfo}>
-                  <Text style={styles.CardName}>{category.name}</Text>
+                  <Text style={styles.CardName}>{project.name}</Text>
                   <Text style={styles.CardBody}>
                     Your request has been sent. We'll let you know if you are approved. Press cancel to withdraw your request.
                   </Text>
@@ -139,9 +139,9 @@ export default function JoinCategoriesScreen({ navigation }: Props) {
                   </View>
 
                   <Pressable
-                    onPress={() => cancelCategoryAccessRequest(category.id)}
+                    onPress={() => cancelProjectAccessRequest(project.id)}
                     accessibilityRole="button"
-                    accessibilityLabel={`Cancel your request to join ${category.name}`}
+                    accessibilityLabel={`Cancel your request to join ${project.name}`}
                     hitSlop={8}
                     style={({ pressed }) => [styles.RecallButton, pressed && { opacity: 0.7 }]}
                   >
