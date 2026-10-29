@@ -1,20 +1,18 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from "expo-status-bar";
 
+import AppTabs from "./src/navigation/AppTabs";
+import { AppStateProvider } from "./src/context/AppStateContext";
+
+/**
+ * Root of the app: supplies the shared organization state and renders the
+ * tab navigation shell.
+ */
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <AppStateProvider>
+      {/* The app is always dark, so keep the status-bar text light. */}
+      <StatusBar style="light" />
+      <AppTabs />
+    </AppStateProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
