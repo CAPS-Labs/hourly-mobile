@@ -3,6 +3,7 @@ import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-nativ
 
 import { Colors } from "../constants/colors";
 import { useAppState } from "../context/AppStateContext";
+import { memberProjects } from "../domain/access";
 
 type SubmitHoursModalProps = {
   visible: boolean;
@@ -10,25 +11,30 @@ type SubmitHoursModalProps = {
 };
 
 /**
- * Full-screen form for logging hours against a service field. Resets its own
+ * Full-screen form for logging hours against a service project. Resets its own
  * inputs on every dismissal so reopening always starts blank.
  */
 export default function SubmitHoursModal({ visible, onClose }: SubmitHoursModalProps) {
-  const { organization, serviceFields, submitHours } = useAppState();
+  const { organization, projects, projectMemberships, submitHours } = useAppState();
 
   const [hoursInput, setHoursInput] = useState("");
   const [notesInput, setNotesInput] = useState("");
-  const [selectedField, setSelectedField] = useState("");
-  const [fieldPickerVisible, setFieldPickerVisible] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+  const [pickerVisible, setPickerVisible] = useState(false);
+
+  // Only projects this member actually serves in can receive hours: open ones
+  // plus the restricted ones they have been approved for.
+  const options = memberProjects(projects, projectMemberships);
+  const selectedProject = options.find((project) => project.id === selectedProjectId) ?? null;
 
   const hours = Number(hoursInput);
-  const canSubmit = Number.isFinite(hours) && hours > 0 && !!selectedField;
+  const canSubmit = Number.isFinite(hours) && hours > 0 && selectedProject !== null;
 
   const reset = () => {
     setHoursInput("");
     setNotesInput("");
-    setSelectedField("");
-    setFieldPickerVisible(false);
+    setSelectedProjectId(null);
+    setPickerVisible(false);
   };
 
   const close = () => {
@@ -37,11 +43,11 @@ export default function SubmitHoursModal({ visible, onClose }: SubmitHoursModalP
   };
 
   const handleSubmit = () => {
-    if (!canSubmit) {
+    if (!canSubmit || !selectedProject) {
       return;
     }
 
-    submitHours({ hours, field: selectedField, notes: notesInput.trim() });
+    submitHours({ hours, projectId: selectedProject.id, notes: notesInput.trim() });
     close();
   };
 
@@ -68,13 +74,13 @@ export default function SubmitHoursModal({ visible, onClose }: SubmitHoursModalP
           style={styles.FieldInput}
         />
 
-        <Text style={styles.FieldLabel}>Service Field</Text>
+        <Text style={styles.FieldLabel}>Project</Text>
         <Pressable
-          onPress={() => setFieldPickerVisible(true)}
+          onPress={() => setPickerVisible(true)}
           style={({ pressed }) => [styles.SelectInput, pressed && { opacity: 0.8 }]}
         >
-          <Text style={selectedField ? styles.SelectValue : styles.SelectPlaceholder}>
-            {selectedField || "Choose a service field"}
+          <Text style={selectedProject ? styles.SelectValue : styles.SelectPlaceholder}>
+            {selectedProject ? selectedProject.name : "Choose a project"}
           </Text>
         </Pressable>
 
@@ -113,37 +119,43 @@ export default function SubmitHoursModal({ visible, onClose }: SubmitHoursModalP
       </View>
 
       <Modal
-        visible={fieldPickerVisible}
+        visible={pickerVisible}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setFieldPickerVisible(false)}
+        onRequestClose={() => setPickerVisible(false)}
       >
         <View style={styles.PickerBackdrop}>
           <View style={styles.PickerSheet}>
-            <Text style={styles.PickerTitle}>Select Service Field</Text>
+            <Text style={styles.PickerTitle}>Select a Project</Text>
 
-            {serviceFields.map((field) => (
+            {options.length === 0 && (
+              <Text style={styles.PickerEmpty}>
+                You are not in any projects yet. Ask an admin to add you to one.
+              </Text>
+            )}
+
+            {options.map((project) => (
               <Pressable
-                key={field}
+                key={project.id}
                 onPress={() => {
-                  setSelectedField(field);
-                  setFieldPickerVisible(false);
+                  setSelectedProjectId(project.id);
+                  setPickerVisible(false);
                 }}
                 style={({ pressed }) => (pressed ? { opacity: 0.7 } : undefined)}
               >
                 <Text
                   style={[
                     styles.PickerOption,
-                    selectedField === field && styles.PickerOptionSelected,
+                    selectedProjectId === project.id && styles.PickerOptionSelected,
                   ]}
                 >
-                  {field}
+                  {project.name}
                 </Text>
               </Pressable>
             ))}
 
             <Pressable
-              onPress={() => setFieldPickerVisible(false)}
+              onPress={() => setPickerVisible(false)}
               style={({ pressed }) => [
                 styles.PickerCancel,
                 pressed && { opacity: 0.8 },
@@ -280,6 +292,12 @@ const styles = StyleSheet.create({
     // Lighter tint of Colors.primary so the selected row stays readable on the dark sheet.
     color: "#8FD08A",
     fontWeight: "600",
+  },
+  PickerEmpty: {
+    color: Colors.secondaryText,
+    fontSize: 14,
+    lineHeight: 20,
+    paddingBottom: 8,
   },
   PickerCancel: {
     marginTop: 12,
