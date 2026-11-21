@@ -43,7 +43,7 @@ export default function MyServiceScreen() {
 
         {hoursByProject.length > 0 && (
           <>
-            <Text style={styles.SectionTitle}>By Project</Text>
+            <Text style={styles.SectionTitle}>By Project (This Session)</Text>
 
             <View style={styles.BreakdownCard}>
               {hoursByProject.map((row) => (
@@ -197,6 +197,7 @@ const styles = StyleSheet.create({
   SubmissionField: {
     color: Colors.secondaryText,
     fontSize: 13,
+    flexShrink: 1,
   },
   SubmissionNotes: {
     color: Colors.secondaryText,
