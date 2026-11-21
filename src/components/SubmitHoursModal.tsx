@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { Colors } from "../constants/colors";
 import { useAppState } from "../context/AppStateContext";
@@ -128,31 +128,33 @@ export default function SubmitHoursModal({ visible, onClose }: SubmitHoursModalP
           <View style={styles.PickerSheet}>
             <Text style={styles.PickerTitle}>Select a Project</Text>
 
-            {options.length === 0 && (
+            {options.length === 0 ? (
               <Text style={styles.PickerEmpty}>
                 You are not in any projects yet. Ask an admin to add you to one.
               </Text>
+            ) : (
+              <ScrollView style={styles.PickerList} showsVerticalScrollIndicator={false}>
+                {options.map((project) => (
+                  <Pressable
+                    key={project.id}
+                    onPress={() => {
+                      setSelectedProjectId(project.id);
+                      setPickerVisible(false);
+                    }}
+                    style={({ pressed }) => (pressed ? { opacity: 0.7 } : undefined)}
+                  >
+                    <Text
+                      style={[
+                        styles.PickerOption,
+                        selectedProjectId === project.id && styles.PickerOptionSelected,
+                      ]}
+                    >
+                      {project.name}
+                    </Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
             )}
-
-            {options.map((project) => (
-              <Pressable
-                key={project.id}
-                onPress={() => {
-                  setSelectedProjectId(project.id);
-                  setPickerVisible(false);
-                }}
-                style={({ pressed }) => (pressed ? { opacity: 0.7 } : undefined)}
-              >
-                <Text
-                  style={[
-                    styles.PickerOption,
-                    selectedProjectId === project.id && styles.PickerOptionSelected,
-                  ]}
-                >
-                  {project.name}
-                </Text>
-              </Pressable>
-            ))}
 
             <Pressable
               onPress={() => setPickerVisible(false)}
@@ -276,6 +278,13 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    // Keep the sheet on screen so long project lists scroll instead of
+    // pushing the Cancel button off the bottom edge.
+    maxHeight: "75%",
+  },
+  PickerList: {
+    flexGrow: 0,
+    flexShrink: 1,
   },
   PickerTitle: {
     color: Colors.text,
