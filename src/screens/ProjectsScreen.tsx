@@ -14,6 +14,11 @@ import type { ProjectsStackParamList } from "../navigation/ProjectsStack";
 
 type Props = NativeStackScreenProps<ProjectsStackParamList, "ProjectsHome">;
 
+/**
+ * Home of the Projects tab: the projects the viewer serves in, admin controls
+ * for editing and membership, and a link to the join screen when other
+ * projects accept requests.
+ */
 export default function ProjectsScreen({ navigation }: Props) {
   const {
     organization,

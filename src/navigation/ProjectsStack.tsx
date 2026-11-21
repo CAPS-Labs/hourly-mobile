@@ -28,6 +28,10 @@ export type ProjectsStackParamList = {
 
 const Stack = createNativeStackNavigator<ProjectsStackParamList>();
 
+/**
+ * Stack navigator for the Projects tab: the project list plus project detail,
+ * editing, membership, requests, opportunity creation and joining screens.
+ */
 export default function ProjectsStack() {
   return (
     <Stack.Navigator

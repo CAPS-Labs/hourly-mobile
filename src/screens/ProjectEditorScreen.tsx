@@ -28,6 +28,11 @@ const ACCESS_OPTIONS: { value: ProjectAccess; label: string; detail: string }[] 
   },
 ];
 
+/**
+ * Creates or edits a project. Admins set the name, description and access mode;
+ * saving either writes a new project or updates the existing one, then returns
+ * to the previous screen.
+ */
 export default function ProjectEditorScreen({ navigation, route }: Props) {
   const { projects, createProject, updateProject, viewerRole, membershipsFor } = useAppState();
 

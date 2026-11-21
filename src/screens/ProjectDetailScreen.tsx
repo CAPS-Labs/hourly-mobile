@@ -9,6 +9,11 @@ import type { ProjectsStackParamList } from "../navigation/ProjectsStack";
 
 type Props = NativeStackScreenProps<ProjectsStackParamList, "ProjectDetail">;
 
+/**
+ * One project in full: its description, admin actions, the viewer's access
+ * state, and every opportunity with sign-up controls where access allows.
+ * Hidden or removed projects fall back to an unavailable screen.
+ */
 export default function ProjectDetailScreen({ navigation, route }: Props) {
   const {
     projects,

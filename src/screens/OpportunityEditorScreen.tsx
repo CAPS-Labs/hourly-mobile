@@ -9,6 +9,11 @@ import type { ProjectsStackParamList } from "../navigation/ProjectsStack";
 
 type Props = NativeStackScreenProps<ProjectsStackParamList, "OpportunityEditor">;
 
+/**
+ * Admin form for adding a service opportunity to one project. Non-admins and
+ * missing projects get a fallback screen; creating requires a title and a
+ * positive whole number of spots.
+ */
 export default function OpportunityEditorScreen({ navigation, route }: Props) {
   const { projects, createOpportunity, viewerRole } = useAppState();
 
