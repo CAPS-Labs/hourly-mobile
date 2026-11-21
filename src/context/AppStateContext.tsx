@@ -113,10 +113,10 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const submitHours = useCallback(({ hours, projectId, notes }: SubmitHoursInput) => {
-    setSubmissions((current) => [
-      { id: nextSubmissionId.current++, hours, projectId, notes },
-      ...current,
-    ]);
+    // Allocate outside the updater: React may replay updaters, and an increment
+    // inside one would burn ids on every replay.
+    const id = nextSubmissionId.current++;
+    setSubmissions((current) => [{ id, hours, projectId, notes }, ...current]);
   }, []);
 
   const isSignedUp = useCallback(
